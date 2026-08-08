@@ -1,0 +1,1369 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Пепел и Сталь — RPG</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,600;0,700;1,600;1,700&family=PT+Sans:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg0:#0d0a07; --panel:#1a130c; --panel2:#211810; --line:#3a2c1a; --line2:#5a4526;
+  --gold:#d3a44c; --gold2:#f0cf8a; --ember:#e0653a; --teal:#4fb3a5; --blood:#c04040; --mana:#5a9fd6;
+  --txt:#e9dcc3; --dim:#a08e6f; --dim2:#6f6250;
+  --r0:#b9b3a4; --r1:#6fa8dc; --r2:#ffd24a; --r3:#e0575f; --r4:#ff9d3b;
+  --fd:'Cormorant',Georgia,serif; --fb:'PT Sans','Segoe UI',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg0);color:var(--txt);font-family:var(--fb);font-size:15px;overflow:hidden}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(1200px 700px at 70% -10%,#2a1a0c66,transparent 60%),
+             radial-gradient(900px 600px at 10% 110%,#1c120866,transparent 60%),
+             radial-gradient(ellipse at 50% 50%,transparent 55%,#000000b8 100%);}
+#fx{position:fixed;inset:0;z-index:1;pointer-events:none}
+#app{position:relative;z-index:2;display:none;height:100vh;overflow:hidden;
+  grid-template-columns:216px 1fr 340px;grid-template-rows:70px 1fr;
+  grid-template-areas:"top top top" "nav main log";}
+#topbar{grid-area:top;display:flex;align-items:center;gap:18px;padding:0 18px;background:linear-gradient(#1c140c,#140e08);border-bottom:1px solid var(--line);box-shadow:0 4px 18px #0009;min-width:0}
+#nav{grid-area:nav;background:var(--panel);border-right:1px solid var(--line);padding:12px 10px;display:flex;flex-direction:column;gap:4px;overflow-y:auto;min-height:0;min-width:0}
+#main{grid-area:main;overflow-y:auto;padding:20px 24px;position:relative;min-height:0;min-width:0}
+#logpane{grid-area:log;background:var(--panel);border-left:1px solid var(--line);display:flex;flex-direction:column;min-height:0;min-width:0}
+.crest{font-family:var(--fd);font-weight:700;font-size:22px;color:var(--gold);letter-spacing:.06em;text-shadow:0 0 18px #d3a44c55;white-space:nowrap}
+.crest small{color:var(--dim);font-size:13px;font-family:var(--fb);letter-spacing:.2em;display:block;margin-top:-4px}
+.tb-name{min-width:150px}
+.tb-name b{font-family:var(--fd);font-size:19px}
+.tb-name span{display:block;color:var(--dim);font-size:12px}
+.tb-bars{flex:1;display:flex;flex-direction:column;gap:5px;max-width:520px}
+.bar{position:relative;height:15px;background:#00000090;border:1px solid #000;box-shadow:inset 0 2px 5px #000c;overflow:hidden}
+.bar>i{position:absolute;left:0;top:0;bottom:0;transition:width .25s ease}
+.bar>span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:700;color:#fff;text-shadow:0 1px 2px #000;letter-spacing:.04em}
+.bar.hp>i{background:linear-gradient(#e0605a,#8c2020)}
+.bar.mp>i{background:linear-gradient(#6aa8e8,#2c5c9c)}
+.bar.xp>i{background:repeating-linear-gradient(45deg,var(--gold),var(--gold) 8px,#b98c34 8px,#b98c34 16px)}
+.bar.ord>i{background:linear-gradient(#8fb36f,#4f7a3a)}
+.bar.hp{height:17px}.bar.mp{height:13px}.bar.xp{height:9px}
+.res{display:flex;gap:14px;font-weight:700;align-items:center}
+.res span{font-size:14px}
+.res .g{color:var(--gold2)}.res .f{color:var(--teal)}
+.res .lv{background:#00000060;border:1px solid var(--line2);padding:3px 10px;color:var(--gold);font-family:var(--fd);font-size:17px}
+.navbtn{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:none;border:1px solid transparent;color:var(--dim);font-family:var(--fb);font-size:14px;font-weight:700;letter-spacing:.05em;padding:10px 12px;cursor:pointer;transition:.18s;clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px)}
+.navbtn i{font-style:normal;width:22px;text-align:center;font-size:16px}
+.navbtn:hover{color:var(--gold2);background:#ffffff08;transform:translateX(3px)}
+.navbtn.on{color:var(--gold2);background:linear-gradient(90deg,#d3a44c22,transparent);border-color:var(--line2);box-shadow:inset 3px 0 0 var(--gold)}
+.navbtn .bdg{margin-left:auto;background:var(--ember);color:#fff;font-size:10px;padding:1px 6px}
+.nav-sep{height:1px;background:var(--line);margin:8px 4px}
+.panel{background:var(--panel);border:1px solid var(--line);padding:16px 18px;margin-bottom:16px;position:relative;box-shadow:0 6px 20px #0006}
+.panel::before{content:"";position:absolute;inset:3px;border:1px solid #ffffff08;pointer-events:none}
+h2.pt{font-family:var(--fd);font-size:28px;font-weight:700;color:var(--gold2);letter-spacing:.04em;margin-bottom:2px}
+h2.pt::after{content:"";display:block;width:70px;height:2px;background:linear-gradient(90deg,var(--gold),transparent);margin-top:4px}
+.sub{color:var(--dim);font-size:13px;margin-bottom:14px;font-style:italic}
+.btn{font-family:var(--fb);font-weight:700;font-size:14px;letter-spacing:.05em;color:var(--txt);background:linear-gradient(#2b2013,#1a130a);border:1px solid var(--line2);padding:9px 18px;cursor:pointer;transition:.15s;clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px)}
+.btn:hover{color:var(--gold2);border-color:var(--gold);box-shadow:0 0 14px #d3a44c33,inset 0 0 10px #d3a44c14;transform:translateY(-1px)}
+.btn:active{transform:translateY(1px)}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
+.btn.danger{border-color:#6c2a2a;color:#e8a0a0}.btn.danger:hover{border-color:var(--blood);box-shadow:0 0 14px #c0404033}
+.btn.big{font-size:16px;padding:13px 30px}
+.btn.gold{background:linear-gradient(#5a4218,#33250d);border-color:var(--gold);color:var(--gold2)}
+.btn.small{padding:5px 10px;font-size:12px}
+.btn.plus{padding:2px 10px;font-size:15px;line-height:1.3}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.cols3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.card{background:var(--panel2);border:1px solid var(--line);padding:14px;transition:.2s;position:relative}
+.card:hover{border-color:var(--line2);transform:translateY(-2px);box-shadow:0 8px 22px #0008}
+.zonecard h3{font-family:var(--fd);font-size:21px;color:var(--txt)}
+.zonecard .lv{color:var(--gold);font-size:12px;font-weight:700;letter-spacing:.1em}
+.zonecard p{color:var(--dim);font-size:13px;margin:6px 0 10px;min-height:50px;font-style:italic}
+.zonecard.locked{opacity:.45;filter:grayscale(.6)}
+.boss-tag{color:var(--blood);font-size:12px;font-weight:700}
+.lootinfo{font-size:11px;color:var(--dim2);margin-top:6px;line-height:1.5}
+.order{display:flex;gap:12px;align-items:center;background:#00000030;border:1px solid var(--line);padding:10px 14px;margin-bottom:8px;transition:.15s}
+.order.done{border-color:#5a7a3a;box-shadow:0 0 14px #7fb95c22}
+.order .oi{font-size:24px}
+.order h4{font-family:var(--fd);font-size:18px}
+.order p{font-size:12.5px;color:var(--dim)}
+.order .rw{font-size:12px;color:var(--gold2);margin-top:2px}
+.item{display:flex;gap:10px;align-items:flex-start;background:#00000030;border:1px solid var(--line);border-left:3px solid var(--r0);padding:9px 12px;margin-bottom:8px;cursor:pointer;transition:.15s}
+.item:hover{background:#ffffff07;transform:translateX(3px)}
+.item.r1{border-left-color:var(--r1)}.item.r2{border-left-color:var(--r2)}.item.r3{border-left-color:var(--r3);box-shadow:0 0 12px #e0575f18}
+.item.r4{border-left-color:var(--r4);box-shadow:0 0 16px #ff9d3b2c;animation:legend 2.4s infinite}
+@keyframes legend{0%,100%{box-shadow:0 0 10px #ff9d3b22}50%{box-shadow:0 0 22px #ff9d3b55}}
+.item .nm{font-weight:700}
+.item .ds{font-size:12px;color:var(--dim)}
+.item .af{font-size:12px;color:#9fb6d0;margin-top:2px}
+.item .spl{font-size:12px;color:var(--gold2);margin-top:2px}
+.item .eq{margin-left:auto;align-self:center;font-size:11px;color:var(--gold);border:1px solid var(--line2);padding:2px 7px;white-space:nowrap}
+.c0{color:var(--r0)}.c1{color:var(--r1)}.c2{color:var(--r2)}.c3{color:var(--r3)}.c4{color:var(--r4)}
+#logpane h3{font-family:var(--fd);font-size:20px;color:var(--gold);padding:12px 16px;border-bottom:1px solid var(--line);letter-spacing:.06em}
+#logbox{flex:1;overflow-y:auto;padding:10px 14px}
+.le{padding:6px 9px;margin-bottom:6px;font-size:13px;line-height:1.45;border-left:2px solid #ffffff14;background:#00000025;animation:lein .35s ease}
+@keyframes lein{from{opacity:0;transform:translateY(7px)}to{opacity:1}}
+.le.sys{border-color:var(--teal);color:#bfe0da}
+.le.loot{border-color:var(--gold);color:#e5d3a8}
+.le.bad{border-color:var(--blood);color:#e5aaaa}
+.le.good{border-color:#7fb95c;color:#c8e5b4}
+.le.story{border-color:#8a6ca8;color:#d8c8ea;font-style:italic}
+#arena{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:16px}
+.combatant{background:var(--panel2);border:1px solid var(--line);padding:18px;text-align:center;position:relative;overflow:hidden}
+.combatant .face{font-size:58px;line-height:1;margin:8px 0;filter:drop-shadow(0 6px 12px #000)}
+.combatant.enemy{border-color:#5c2a2a}
+.combatant.enemy.boss{border-color:var(--blood);box-shadow:0 0 26px #c0404030,inset 0 0 40px #c0404012;animation:bosspulse 2.6s infinite}
+@keyframes bosspulse{0%,100%{box-shadow:0 0 18px #c0404022}50%{box-shadow:0 0 34px #c0404055}}
+.combatant h3{font-family:var(--fd);font-size:23px}
+.combatant .tag{font-size:11px;color:var(--dim);letter-spacing:.14em;text-transform:uppercase}
+.chlabel{font-size:10px;color:var(--dim2);letter-spacing:.15em;margin-top:6px}
+.float{position:absolute;left:50%;top:36%;font-family:var(--fd);font-weight:700;font-size:30px;color:#ff8d7a;pointer-events:none;animation:fl .9s forwards;text-shadow:0 2px 4px #000}
+.float.crit{font-size:42px;color:var(--gold2)}
+.float.heal{color:#8fe08f}
+@keyframes fl{from{opacity:1;transform:translate(-50%,0)}to{opacity:0;transform:translate(-50%,-52px)}}
+.shake{animation:shk .32s}
+@keyframes shk{0%,100%{transform:translateX(0)}25%{transform:translateX(-7px)}75%{transform:translateX(6px)}}
+#cfeed{height:170px;overflow-y:auto;background:#00000040;border:1px solid var(--line);padding:10px 14px;margin-bottom:14px;font-size:13.5px}
+#cfeed p{margin-bottom:5px;animation:lein .3s ease}
+#cfeed .p{color:#e8d8b0}#cfeed .e{color:#e5a0a0}#cfeed .s{color:#9fd0c8;font-style:italic}#cfeed .c{color:var(--gold2);font-weight:700}
+.skillbar{display:flex;flex-wrap:wrap;gap:8px}
+.skillbar .btn small{display:block;font-weight:400;font-size:10.5px;color:var(--mana);letter-spacing:0}
+#treewrap{position:relative;height:calc(100vh - 230px);min-height:460px;border:1px solid var(--line);background:radial-gradient(900px 600px at 50% 40%,#1e160d,#0c0906);overflow:hidden}
+#treesvg{width:100%;height:100%;cursor:grab;touch-action:none}
+#treesvg.grab{cursor:grabbing}
+.nd{transition:.15s;cursor:pointer}
+.nd:hover{filter:brightness(1.5)}
+.nd.av circle.halo{animation:halo 1.8s infinite}
+@keyframes halo{0%,100%{opacity:.15}50%{opacity:.6}}
+#tt{position:absolute;z-index:5;background:#12100af2;border:1px solid var(--line2);padding:10px 13px;font-size:13px;max-width:280px;pointer-events:none;display:none;box-shadow:0 8px 24px #000c}
+#tt b{font-family:var(--fd);font-size:17px;display:block;margin-bottom:3px}
+#tt .m{color:#9fd0a8}#tt .st{color:var(--dim);font-size:11.5px;margin-top:5px}
+.pips{display:flex;gap:6px;margin:10px 0}
+.pip{width:16px;height:16px;border:1px solid var(--line2);transform:rotate(45deg);background:#00000060}
+.pip.done{background:var(--gold);box-shadow:0 0 8px #d3a44c88}
+.pip.cur{background:var(--ember);box-shadow:0 0 8px #e0653a88;animation:halo 1.4s infinite}
+.statline{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px dashed #ffffff10;font-size:14px;gap:10px;align-items:center}
+.statline b{color:var(--gold2)}
+.statline .hint{font-size:11px;color:var(--dim2);display:block}
+.mast{display:inline-block;background:#ff9d3b22;border:1px solid var(--r4);color:var(--r4);font-size:10px;padding:1px 6px;margin-left:6px;letter-spacing:.06em}
+.gemchip{display:inline-flex;gap:4px;align-items:center;background:#00000050;border:1px solid var(--line2);padding:3px 9px;font-size:12px;cursor:pointer;margin:2px}
+.gemchip:hover{border-color:var(--gold)}
+select.gsel{background:#00000070;color:var(--txt);border:1px solid var(--line2);padding:3px 6px;font-size:12px}
+.toast{position:fixed;top:14px;left:50%;transform:translateX(-50%) translateY(-70px);z-index:99;background:#1c140af5;border:1px solid var(--gold);color:var(--gold2);font-weight:700;padding:12px 26px;transition:.35s;opacity:0;box-shadow:0 10px 30px #000c;letter-spacing:.04em;text-align:center}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+#err{display:none;position:fixed;bottom:10px;left:10px;z-index:200;background:#3a1010;border:1px solid var(--blood);color:#ffb0b0;font-size:12px;padding:8px 12px;max-width:70vw}
+#create{position:relative;z-index:2;height:100vh;overflow-y:auto;padding:30px 20px;background:radial-gradient(1000px 500px at 50% -10%,#2a1a0c88,transparent 60%)}
+#create .wrap{max-width:1060px;margin:0 auto}
+.title-big{font-family:var(--fd);font-weight:700;font-size:clamp(44px,7vw,84px);text-align:center;color:var(--gold);letter-spacing:.12em;text-shadow:0 0 34px #d3a44c44,0 4px 0 #00000088;line-height:1}
+.title-sub{text-align:center;color:var(--dim);letter-spacing:.44em;font-size:12px;margin:8px 0 34px;text-transform:uppercase}
+.selgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin-bottom:22px}
+.selcard{background:var(--panel2);border:1px solid var(--line);padding:14px;cursor:pointer;transition:.18s}
+.selcard:hover{transform:translateY(-3px);border-color:var(--line2);box-shadow:0 10px 24px #000a}
+.selcard.on{border-color:var(--gold);box-shadow:0 0 20px #d3a44c33;background:#2a1f10}
+.selcard h4{font-family:var(--fd);font-size:20px;color:var(--gold2)}
+.selcard p{font-size:12.5px;color:var(--dim);margin-top:5px;line-height:1.45}
+.selcard .bn{margin-top:8px;font-size:12px;color:#9fd0a8}
+#cname{background:#00000060;border:1px solid var(--line2);color:var(--gold2);font-family:var(--fd);font-size:22px;padding:8px 14px;width:320px;outline:none}
+#cname:focus{border-color:var(--gold);box-shadow:0 0 14px #d3a44c33}
+::-webkit-scrollbar{width:9px}::-webkit-scrollbar-track{background:#00000030}
+::-webkit-scrollbar-thumb{background:var(--line2);border:2px solid var(--bg0)}
+@media(max-width:1100px){#app{grid-template-columns:64px 1fr;grid-template-areas:"top top" "nav main"}#logpane{display:none}}
+</style>
+</head>
+<body>
+<canvas id="fx"></canvas>
+
+<div id="create"><div class="wrap">
+  <div class="title-big">ПЕПЕЛ И СТАЛЬ</div>
+  <div class="title-sub">хроники выжженных земель</div>
+  <div class="panel"><h2 class="pt">Рождение героя</h2><div class="sub">Пепел падает с небес уже сотый год. Пять твердынь ещё держатся — им нужен клинок. Выбери, кем ты был до войны.</div>
+    <div style="font-weight:700;color:var(--gold);letter-spacing:.1em;margin-bottom:8px">РАСА</div>
+    <div class="selgrid" id="racegrid"></div>
+    <div style="font-weight:700;color:var(--gold);letter-spacing:.1em;margin-bottom:8px">КЛАСС</div>
+    <div class="selgrid" id="classgrid"></div>
+    <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:6px">
+      <input id="cname" maxlength="16" placeholder="Имя героя…">
+      <button class="btn big gold" onclick="startGame()">⚔ Вступить в Грейхолд</button>
+    </div>
+    <div id="csum" style="margin-top:14px;color:var(--dim);font-size:13px"></div>
+  </div>
+</div></div>
+
+<div id="app">
+  <header id="topbar">
+    <div class="crest">ПЕПЕЛ И СТАЛЬ<small>ГРЕЙХОЛД</small></div>
+    <div class="tb-name"><b id="t-name"></b><span id="t-race"></span></div>
+    <span class="res"><span class="lv" id="t-lvl">1</span></span>
+    <div class="tb-bars">
+      <div class="bar hp"><i id="b-hp"></i><span id="t-hp"></span></div>
+      <div class="bar mp"><i id="b-mp"></i><span id="t-mp"></span></div>
+      <div class="bar xp"><i id="b-xp"></i><span id="t-xp" style="font-size:8px"></span></div>
+    </div>
+    <span class="res"><span class="g" id="t-gold">0 🪙</span><span class="f" id="t-frag">0 ◆</span></span>
+  </header>
+  <nav id="nav"></nav>
+  <main id="main"></main>
+  <aside id="logpane"><h3>📜 Летопись</h3><div id="logbox"></div></aside>
+</div>
+<div class="toast" id="toast"></div>
+<div id="err"></div>
+
+<script>
+/* ================= ЯДРО ================= */
+const $=id=>document.getElementById(id);
+const R=(a,b)=>a+Math.random()*(b-a);
+const RI=(a,b)=>Math.floor(R(a,b+1));
+const P=a=>a[RI(0,a.length-1)];
+const fmt=n=>{const v=Math.floor(Number(n));return isNaN(v)?'0':v.toLocaleString('ru-RU');};
+let UID=0; const uid=()=>'x'+(++UID)+Math.random().toString(36).slice(2,5);
+window.addEventListener('error',e=>{const el=$('err');if(el){el.style.display='block';el.textContent='Ошибка: '+(e.message||'неизвестная');}});
+function showErr(msg){const el=$('err');if(el){el.style.display='block';el.textContent='Ошибка: '+msg;}}
+const MODN={hp:'к макс. ОЗ',mp:'к макс. Маны',str:'Сила',dex:'Ловкость',int:'Интеллект',vit:'Выносливость',luk:'Удача',phys:'физ. урона',spell:'маг. урона',dmg:'любого урона',crit:'шанс крит.',critd:'крит. урон',armor:'брони',evade:'уклонение',leech:'кража жизни',gf:'к золоту',mf:'к шансу лута',xp:'к опыту',spd:'к скорости',resfire:'сопр. огню',respoison:'сопр. яду',resice:'сопр. льду',reslight:'сопр. молнии',resshadow:'сопр. тьме'};
+const modStr=(k,v)=>{const pct=['hp','mp','phys','spell','dmg','crit','critd','armor','evade','leech','gf','mf','xp','spd','resfire','respoison','resice','reslight','resshadow'].includes(k);return (v>0?'+':'')+v+(pct?'%':'')+' '+(MODN[k]||k);};
+
+/* ================= ДАННЫЕ ================= */
+const RACES={
+ human:{name:'Человек',icon:'🧑',desc:'Дети пепла, упрямые и живучие.',b:{str:1,dex:1,int:1,vit:1},mods:[{k:'xp',v:10}],trait:'+10% опыта, +1 ко всем хар-кам'},
+ orc:{name:'Орк',icon:'👹',desc:'Чем ближе смерть — тем яростнее бьют.',b:{str:3,vit:2,dex:0,int:-1},mods:[],trait:'Ярость: +25% урона при ОЗ < 35%'},
+ elf:{name:'Эльф',icon:'🧝',desc:'Бьют точно в щели брони.',b:{dex:3,int:2,str:0,vit:-1},mods:[{k:'crit',v:3}],trait:'+3% шанс критического удара'},
+ dwarf:{name:'Дворф',icon:'⛏️',desc:'Сталь слушается их рук.',b:{str:2,vit:2,dex:0,int:0},mods:[],trait:'+15% к шансу успеха заточки'},
+ undead:{name:'Нежить',icon:'💀',desc:'Чужая жизнь подпитывает их.',b:{int:3,dex:2,str:0,vit:-2},mods:[{k:'leech',v:5}],trait:'5% кражи жизни'}};
+const CLASSES={
+ war:{name:'Воин',icon:'⚔️',desc:'Стена из стали и злобы.',col:'#e0653a',skills:['strike','cleave','warcry','blood','execute','storm']},
+ mage:{name:'Маг',icon:'🔥',desc:'Хрупок, как стекло, и вдвое опаснее.',col:'#5a9fd6',skills:['fireball','nova','arcanic','drain','meteor','tempest']},
+ rog:{name:'Разбойник',icon:'🗡️',desc:'Сначала удар, потом вопросы.',col:'#7fb95c',skills:['sneak','fan','poison','dance','evis','mark']},
+ ran:{name:'Следопыт',icon:'🏹',desc:'Стрела находит цель даже в тумане пепла.',col:'#c9b458',skills:['aimed','rain','trap','pierce','hawk','barrage']},
+ pal:{name:'Паладин',icon:'🛡️',desc:'Лечит себя верой, врагов — молотом.',col:'#f0cf8a',skills:['smite','holy','shield','consecrate','judgement','aegis']}};
+const GROW={war:{str:1.2,vit:0.9,dex:0.3,int:0.1},mage:{int:1.2,vit:0.5,dex:0.3,str:0.1},rog:{dex:1.2,str:0.5,vit:0.4,int:0.1},ran:{dex:1.0,str:0.6,vit:0.5,int:0.2},pal:{str:1.0,vit:1.0,int:0.4,dex:0.2}};
+const SKILLDB={
+ strike:{n:'Мощный удар',mp:6,mult:1.7,txt:'вкладывает всю массу в сокрушительный удар',m:{cb:35},md:'+35% шанса крита'},
+ cleave:{n:'Размах',mp:12,mult:1.1,hits:2,txt:'рассекает воздух широким полукругом',m:{hits:3},md:'3 удара вместо двух'},
+ warcry:{n:'Боевой клич',mp:10,buff:[{k:'dmg',pct:25,t:8}],txt:'испускает рёв, разжигающий кровь',m:{healPct:15},md:'также лечит 15% ОЗ'},
+ blood:{n:'Кровавый клинок',mp:14,mult:2.3,selfcost:8,txt:'кровь питает сталь',m:{leech:25},md:'лечит 25% нанесённого урона'},
+ execute:{n:'Казнь',mp:10,mult:1.9,exec:30,txt:'добивает раненого врага (+60% урона ниже порога)',m:{exec:55},md:'порог казни — 55% ОЗ'},
+ storm:{n:'Железный шторм',mp:18,mult:0.65,hits:4,txt:'обрушивает на врага град ударов',m:{cb:25},md:'+25% шанса крита'},
+ fireball:{n:'Огненный шар',mp:10,mult:1.9,mag:1,txt:'метает сгусток ревущего пламени',m:{dot:{pct:12,t:3}},md:'поджигает врага'},
+ nova:{n:'Ледяная нова',mp:14,mult:1.25,mag:1,stun:2,txt:'взрывает воздух кольцом стужи',m:{stun:2},md:'оглушение 4 секунды'},
+ arcanic:{n:'Чародейский залп',mp:20,mult:2.7,mag:1,txt:'обрушивает поток чистой магии',m:{cb:20},md:'+20% шанса крита'},
+ drain:{n:'Похищение сущности',mp:12,mult:1.5,mag:1,heal:40,txt:'вытягивает жизнь из раны',m:{heal:70},md:'лечит 70% нанесённого урона'},
+ meteor:{n:'Метеор',mp:26,mult:3.4,mag:1,txt:'рвёт небо горящим камнем',m:{dot:{pct:14,t:4}},md:'поджигает врага'},
+ tempest:{n:'Буря стихий',mp:18,mult:1.0,mag:1,hits:3,txt:'призывает три разряда стихий',m:{hits:4},md:'4 разряда вместо трёх'},
+ sneak:{n:'Подлый удар',mp:7,mult:1.35,forcrit:1,txt:'бьёт в сочленение доспеха — всегда крит',m:{critd:60},md:'+60% крит. урона'},
+ fan:{n:'Веер клинков',mp:12,mult:0.7,hits:3,txt:'серия молниеносных порезов',m:{hits:4},md:'4 пореза вместо трёх'},
+ poison:{n:'Отравленный клинок',mp:9,mult:1.0,dot:{pct:14,t:4},txt:'клинок, смазанный чёрной смолой',m:{dot:{pct:22,t:4}},md:'яд усиливается'},
+ dance:{n:'Танец теней',mp:12,mult:0.9,hits:2,after:[{k:'evadeB',pct:30,t:5}],txt:'скользит между ударами (+30% уклонения)',m:{leech:15},md:'лечит 15% нанесённого урона'},
+ evis:{n:'Потрошение',mp:14,mult:2.0,combo:'poison',txt:'жестокий удар: ×1.8 по отравленным',m:{combo:2.4},md:'комбо ×2.4'},
+ mark:{n:'Метка смерти',mp:10,mult:0.8,debuff:{pct:25,t:8},txt:'враг получает +25% урона',m:{debuff:40},md:'метка: +40% урона'},
+ aimed:{n:'Прицельный выстрел',mp:7,mult:1.8,cb:40,txt:'долго целится — и спускает тетиву',m:{cb:70},md:'+70% шанса крита'},
+ rain:{n:'Град стрел',mp:12,mult:0.75,hits:3,txt:'три стрелы одна за другой',m:{hits:4},md:'4 стрелы вместо трёх'},
+ trap:{n:'Капкан',mp:9,mult:0.9,dot:{pct:12,t:4},txt:'зазубренный капкан у ног врага',m:{stun:1},md:'также оглушает'},
+ pierce:{n:'Пронзающий выстрел',mp:12,mult:2.1,pierce:1,txt:'прошивает доспех (игнорирует Каменного и половину брони)',m:{cb:30},md:'+30% шанса крита'},
+ hawk:{n:'Ястребиный глаз',mp:10,buff:[{k:'dmg',pct:20,t:8},{k:'critB',pct:15,t:8}],txt:'мир замедляется (+урон, +крит)',m:{buffT:4},md:'+4 с действия'},
+ barrage:{n:'Заградительный огонь',mp:18,mult:0.6,hits:4,txt:'стена стрел закрывает небо',m:{dot:{pct:9,t:3}},md:'стрелы рвут плоть'},
+ smite:{n:'Кара',mp:8,mult:1.6,heal:15,txt:'молот, пылающий светом (лечит 15% урона)',m:{heal:30},md:'лечит 30% урона'},
+ holy:{n:'Свет зари',mp:12,healPct:30,txt:'молитва затягивает раны',m:{healPct:45},md:'лечит 45% ОЗ'},
+ shield:{n:'Щит веры',mp:10,buff:[{k:'shield',pct:50,t:8}],txt:'щит вспыхивает рунами (−50% входящего урона)',m:{buffT:4},md:'+4 с действия'},
+ consecrate:{n:'Освящение',mp:12,mult:1.1,dot:{pct:10,t:4},txt:'кольцо карающего пламени',m:{dot:{pct:16,t:4}},md:'пламя усиливается'},
+ judgement:{n:'Праведный суд',mp:18,mult:2.5,heal:25,txt:'свет обрушивается колонной (лечит 25% урона)',m:{exec:35},md:'казнь до 35% ОЗ'},
+ aegis:{n:'Эгида рассвета',mp:14,buff:[{k:'shield',pct:35,t:8},{k:'regen',pct:3,t:8}],txt:'свет обнимает, как латы (−35% урона, реген)',m:{buffT:4},md:'+4 с действия'}};
+function cdFor(rank,mast){return Math.max(1500,2600-120*(rank-1)-(mast?200:0));}
+const STATS={str:'Сила',dex:'Ловкость',int:'Интеллект',vit:'Выносливость',luk:'Удача'};
+const STATHINT={str:'урон оружием',dex:'+0.35% крит и +0.3% уклон за очко',int:'+5 маны, сила чар',vit:'+9 ОЗ, +0.5 брони',luk:'+1% лута и золота'};
+const SLOTN={weapon:'Оружие',helmet:'Шлем',armor:'Доспех',gloves:'Перчатки',boots:'Сапоги',amulet:'Амулет',ring:'Кольцо'};
+const BASES=[
+ {s:'weapon',lv:1,nm:['Ржавый меч','Кривой кинжал','Охотничий лук','Ученический посох'],dmg:[4,8],icon:'🗡️'},
+ {s:'weapon',lv:5,nm:['Стальной меч','Боевой топор','Композитный лук','Дубовый посох'],dmg:[9,15],icon:'⚔️'},
+ {s:'weapon',lv:10,nm:['Клинок стражи','Секира наёмника','Тисовый лук','Посох ордена'],dmg:[16,25],icon:'⚔️'},
+ {s:'weapon',lv:16,nm:['Рунный клинок','Двуручный молот','Волчий лук','Посох бури'],dmg:[26,38],icon:'⚔️'},
+ {s:'weapon',lv:23,nm:['Клинок из метеорита','Двуручник пепла','Лук охотника душ','Посох пустоты'],dmg:[39,56],icon:'⚔️'},
+ {s:'helmet',lv:1,nm:['Кожаный капюшон','Ржавый шишак'],arm:2,icon:'🪖'},
+ {s:'helmet',lv:8,nm:['Стальной шлем','Шлем наёмника'],arm:8,icon:'🪖'},
+ {s:'helmet',lv:16,nm:['Рунный шлем','Венец стража'],arm:16,icon:'🪖'},
+ {s:'armor',lv:1,nm:['Стёганка','Кожаный доспех'],arm:4,icon:'🥋'},
+ {s:'armor',lv:8,nm:['Кольчуга','Чешуйчатый доспех'],arm:14,icon:'🛡️'},
+ {s:'armor',lv:16,nm:['Латный доспех','Рунная броня'],arm:26,icon:'🛡️'},
+ {s:'gloves',lv:1,nm:['Кожаные перчатки'],arm:1,icon:'🧤'},
+ {s:'gloves',lv:9,nm:['Стальные рукавицы'],arm:6,icon:'🧤'},
+ {s:'gloves',lv:18,nm:['Рукавицы войны'],arm:12,icon:'🧤'},
+ {s:'boots',lv:1,nm:['Стоптанные сапоги'],arm:1,icon:'🥾'},
+ {s:'boots',lv:9,nm:['Кавалерийские сапоги'],arm:6,icon:'🥾'},
+ {s:'boots',lv:18,nm:['Сапоги следопыта'],arm:12,icon:'🥾'},
+ {s:'amulet',lv:3,nm:['Медный амулет','Костяной оберег'],icon:'📿'},
+ {s:'amulet',lv:12,nm:['Серебряный амулет','Амулет ордена'],icon:'📿'},
+ {s:'ring',lv:3,nm:['Кольцо с печаткой'],icon:'💍'},
+ {s:'ring',lv:12,nm:['Кольцо с руной'],icon:'💍'}];
+const PRE=[
+ {n:'Жестокий',k:'phys',v:[4,10]},{n:'Пылающий',k:'spell',v:[4,10]},{n:'Вампирский',k:'leech',v:[2,6]},
+ {n:'Гигантский',k:'hp',v:[5,12]},{n:'Мудрый',k:'mp',v:[8,18]},{n:'Яростный',k:'critd',v:[8,22]},
+ {n:'Стойкий',k:'armor',v:[5,12]},{n:'Свирепый',k:'dmg',v:[3,8]},{n:'Кровавый',k:'str',v:[2,6]},
+ {n:'Хищный',k:'dex',v:[2,6]},{n:'Астральный',k:'int',v:[2,6]}];
+const SUF=[
+ {n:'точности',k:'crit',v:[1,4]},{n:'ветра',k:'evade',v:[1,4]},{n:'удачи',k:'luk',v:[2,5]},
+ {n:'алчности',k:'gf',v:[5,15]},{n:'прозрения',k:'xp',v:[4,10]},{n:'сокровищ',k:'mf',v:[5,15]},
+ {n:'жизни',k:'vit',v:[2,6]},{n:'быстроты',k:'spd',v:[2,6]}];
+const SUF2=SUF.concat([
+ {n:'огнеупорности',k:'resfire',v:[4,10]},{n:'гнилостойкости',k:'respoison',v:[4,10]},
+ {n:'морозостойкости',k:'resice',v:[4,10]},{n:'громоотводности',k:'reslight',v:[4,10]},
+ {n:'тенеустойчивости',k:'resshadow',v:[4,10]}]);
+const RAR=['Обычный','Волшебный','Редкий','Эпический','Легендарный'];
+const RC=['c0','c1','c2','c3','c4'];
+const RMUL=[1,1.6,2.6,4.2,6.5];
+const LEGN=['Пепел и Сталь','Клятва Последнего','Эхо Пустоты','Венец Сгоревших','Зуб Лютоволка','Слеза Арахны','Жатва Мортиса','Сердце Вулкана','Шёпот Полуночи'];
+const UNIQUES=[
+ {nm:'Зуб Лютоволка',slot:'weapon',icon:'🗡️',lvl:4,bd:[12,16],mods:{phys:10,crit:3},sp:'wolf',spd:'Критические удары лечат 5% макс. ОЗ'},
+ {nm:'Слеза Арахны',slot:'amulet',icon:'📿',lvl:7,mods:{dex:4,leech:3},sp:'tear',spd:'Атаки отравляют врага'},
+ {nm:'Жатва Мортиса',slot:'weapon',icon:'⚔️',lvl:12,bd:[24,32],mods:{dmg:10,str:4},sp:'reap',spd:'+30% урона по боссам'},
+ {nm:'Сердце Вулкана',slot:'ring',icon:'💍',lvl:17,mods:{spell:20,int:5},sp:'vulcan',spd:'Атаки поджигают врага'},
+ {nm:'Клятва Последнего',slot:'armor',icon:'🛡️',lvl:14,arm:22,mods:{hp:12,vit:4},sp:'oath',spd:'При ОЗ < 30% получаемый урон −20%'},
+ {nm:'Шёпот Полуночи',slot:'boots',icon:'🥾',lvl:20,arm:14,mods:{evade:8,dex:5},sp:'whisper',spd:'+15% к шансу побега из боя'},
+ {nm:'Венец Сгоревших',slot:'helmet',icon:'👑',lvl:10,arm:12,mods:{hp:15,mp:10},sp:'crown',spd:'Регенерация 2% ОЗ каждый раунд'},
+ {nm:'Эхо Пустоты',slot:'amulet',icon:'🌑',lvl:18,mods:{xp:15,mf:15,int:3},sp:'echo',spd:'Пустота шепчет тебе имена мёртвых'}];
+const SIG=['Зуб Лютоволка','Слеза Арахны','Жатва Мортиса','Сердце Вулкана','Шёпот Полуночи'];
+const ZONE_SET=[
+ [{nm:'Клык разбойника',slot:'weapon',lv:2,bd:[6,9],mods:{phys:6,crit:2}},{nm:'Шкура вожака',slot:'armor',lv:3,arm:6,mods:{hp:8,vit:2}}],
+ [{nm:'Жало Арахны',slot:'weapon',lv:7,bd:[13,18],mods:{leech:4,dex:3}},{nm:'Хитиновый панцирь',slot:'armor',lv:7,arm:12,mods:{armor:10,evade:3}}],
+ [{nm:'Костяная коса',slot:'weapon',lv:12,bd:[22,30],mods:{dmg:8,str:4}},{nm:'Саван плакальщицы',slot:'armor',lv:12,arm:18,mods:{mp:15,spell:10}}],
+ [{nm:'Обсидиановый клинок',slot:'weapon',lv:18,bd:[34,44],mods:{phys:15,critd:20}},{nm:'Магмовые латы',slot:'armor',lv:18,arm:26,mods:{hp:15,armor:12}}],
+ [{nm:'Клинок полуночи',slot:'weapon',lv:24,bd:[48,60],mods:{dmg:15,leech:6}},{nm:'Покров кошмара',slot:'armor',lv:24,arm:32,mods:{evade:10,crit:6}}]];
+const ELEMS={fire:{n:'Огонь',icon:'🔥',c:'#ff8c4a'},poison:{n:'Яд',icon:'☠',c:'#7fb95c'},ice:{n:'Лёд',icon:'❄',c:'#8fd0ff'},light:{n:'Молния',icon:'⚡',c:'#ffe06a'},shadow:{n:'Тьма',icon:'🌑',c:'#b48fe0'}};
+const ZONE_ELEM=[null,'poison','shadow','fire','shadow'];
+const GEMS={
+ ruby:{n:'Рубин Пламени',icon:'🔴',w:'+20% урона огнём, 20% шанс поджечь',a:'+12% сопротивление огню'},
+ emerald:{n:'Изумруд Гнили',icon:'🟢',w:'+20% урона ядом, 25% шанс отравить',a:'+12% сопротивление яду'},
+ sapphire:{n:'Сапфир Стужи',icon:'🔵',w:'+20% урона льдом, замедляет врага на 15%',a:'+12% сопротивление льду'},
+ topaz:{n:'Топаз Бури',icon:'🟡',w:'+15% урона молнией, +5% шанс крита',a:'+12% сопротивление молнии'},
+ onyx:{n:'Оникс Тьмы',icon:'⚫',w:'кража жизни 6%',a:'+12% сопротивление тьме'},
+ diamond:{n:'Алмаз Чистоты',icon:'⚪',w:'+10% урона',a:'+8% ко всем сопротивлениям'}};
+const TRAITS=[
+ {k:'venom',n:'Ядовитый',icon:'☠',c:'#7fb95c'},
+ {k:'regen',n:'Регенерирующий',icon:'💚',c:'#6fdc8f'},
+ {k:'burn',n:'Пылающий',icon:'🔥',c:'#ff8c4a'},
+ {k:'stone',n:'Каменный',icon:'🪨',c:'#b0a58f'},
+ {k:'swift',n:'Стремительный',icon:'⚡',c:'#e8e06a'},
+ {k:'vamp',n:'Вампирский',icon:'🩸',c:'#e0575f'},
+ {k:'curse',n:'Проклятый',icon:'🟣',c:'#b48fe0'}];
+const TROPH=[
+ [{nm:'Волчий клык',icon:'🦷'},{nm:'Спутанная шерсть',icon:'🧶'}],
+ [{nm:'Хитиновая пластина',icon:'🪲'},{nm:'Гнилой глаз',icon:'👁️'}],
+ [{nm:'Костяная пыль',icon:'🦴'},{nm:'Осколок саркофага',icon:'⚱️'}],
+ [{nm:'Пепельная эссенция',icon:'🔥'},{nm:'Обсидиановая крошка',icon:'⬛'}],
+ [{nm:'Тёмный ихор',icon:'🩸'},{nm:'Перо кошмара',icon:'🪶'}]];
+const BOSS_TROPH=[{nm:'Клыки вожака',icon:'🦴'},{nm:'Паучий шёлк',icon:'🕸️'},{nm:'Коса жнеца',icon:'⚰️'},{nm:'Магмовое ядро',icon:'🌋'},{nm:'Сердце тьмы',icon:'🌑'}];
+const ELIXN={rage:{n:'Эликсир Ярости',icon:'🔥',d:'+25% урона на 10 с'},stone:{n:'Эликсир Камня',icon:'🪨',d:'+40% брони на 10 с'},swift:{n:'Эликсир Сокола',icon:'🦅',d:'+35% скорости атаки на 10 с'}};
+const RECIPES=[
+ {id:'hp',n:'Зелье лечения',icon:'🧪',gold:25,tro:2,out:{pot:'hp'},d:'+40% ОЗ'},
+ {id:'mp',n:'Зелье маны',icon:'🧪',gold:20,tro:2,out:{pot:'mp'},d:'+50% маны'},
+ {id:'rage',n:'Эликсир Ярости',icon:'🔥',gold:80,btro:1,out:{elix:'rage'},d:'+25% урона на 10 с (в бою)'},
+ {id:'stone',n:'Эликсир Камня',icon:'🪨',gold:80,btro:1,out:{elix:'stone'},d:'+40% брони на 10 с (в бою)'},
+ {id:'swift',n:'Эликсир Сокола',icon:'🦅',gold:80,btro:1,out:{elix:'swift'},d:'+35% скорости атаки на 10 с (в бою)'},
+ {id:'prot',n:'Камень-оберег',icon:'🛡',gold:150,btro:2,out:{prot:1},d:'спасает предмет при провале заточки'},
+ {id:'gem',n:'Случайный самоцвет',icon:'💎',gold:80,frag:3,out:{gem:1},d:'самоцвет для гнезда'}];
+const STORIES=['Сквозь щели в стенах сочится серый свет. Где-то в глубине капает вода — и кажется, что это шаги.','На стене выцарапано: «Они приходят на запах страха». Ниже кто-то дописал: «Иди молча».','Под ногами хрустят кости. Старые. Очень старые. Слишком старые, чтобы бояться.','В углу лежит ржавый шлем. Внутри — только пепел и монета давно мёртвого короля.','Факелы здесь горят синим. Воздух пахнет озоном и чужой злобой.','Ты находишь привал: остывший костёр, недоеденный хлеб. Хозяева ушли в спешке. Или их унесли.'];
+const TRAPS=[{t:'Из стены вылетает отравленный дротик!',hp:10},{t:'Плита под ногой проваливается — ты летишь вниз!',hp:13},{t:'Ледяной порыв пробирает до костей!',mp:20},{t:'Рой пепельных ос жалит лицо!',hp:8}];
+const SPEC=[{n:'Жестокий выпад',m:1.9},{n:'Рёв ярости',buff:{k:'dmg',pct:30,t:8}},{n:'Каменная кожа',buff:{k:'def',pct:45,t:8}},{n:'Смертельный вой',m:1.6}];
+const ZONES=[
+ {nm:'Волчий лес',lv:1,icon:'🌲',ds:'Серые тени между мёртвых сосен. Волки здесь голодны круглый год.',
+  mobs:[{n:'Дикий волк',f:'🐺'},{n:'Волк-разбойник',f:'🏴'},{n:'Лесной бандит',f:'🪓'}],
+  boss:{n:'Лютоволк',f:'🐺',ds:'Огромный вожак стаи, чья шкура помнит десятки клинков.',sp:{n:'Клыки ярости',m:1.9,txt:'Лютоволк вгрызается в плечо!'}}},
+ {nm:'Старая шахта',lv:5,icon:'⛏️',ds:'Жилы серебра иссякли, но в забоях копошится кое-что похуже.',
+  mobs:[{n:'Пещерный паук',f:'🕷️'},{n:'Рудничный гуль',f:'🧟'},{n:'Гоблин-шахтёр',f:'👺'}],
+  boss:{n:'Арахна',f:'🕸️',ds:'Мать роя. Её паутина держит целые залы.',sp:{n:'Кокон',m:1.8,heal:12,txt:'Арахна опутывает тебя липкой нитью и пьёт кровь!'}}},
+ {nm:'Королевский склеп',lv:10,icon:'⚰️',ds:'Усыпальница королей, сгоревших вместе со столицей.',
+  mobs:[{n:'Скелет-копейщик',f:'💀'},{n:'Плачущая душа',f:'👻'},{n:'Гробничный страж',f:'🗿'}],
+  boss:{n:'Мортис',f:'☠️',ds:'Жнец королей. Столетие собирал короны — и головы под ними.',sp:{n:'Рука смерти',m:2.0,txt:'Костяная ладонь сжимает твоё горло!'}}},
+ {nm:'Пепельные горы',lv:16,icon:'🌋',ds:'Земля дрожит, из трещин дышит жар. Гора не спит — она ждёт.',
+  mobs:[{n:'Пепельный элементаль',f:'🔥'},{n:'Лавовый слизень',f:'🟠'},{n:'Обсидиановый голем',f:'🗿'}],
+  boss:{n:'Вулкан',f:'🌋',ds:'Магмовый колосс, сердце горы.',sp:{n:'Извержение',m:1.9,txt:'Вулкан извергает поток лавы!'}}},
+ {nm:'Цитадель Ночи',lv:22,icon:'🌑',ds:'Крепость, вырезанная из самой темноты. Отсюда пришёл пепел.',
+  mobs:[{n:'Порождение тьмы',f:'🦇'},{n:'Рыцарь пустоты',f:'⚫'},{n:'Крылатый кошмар',f:'😈'}],
+  boss:{n:'Князь Полуночи',f:'👿',ds:'Тот, кто зажёг небо. Последний враг выжженных земель.',sp:{n:'Затмение',m:2.1,txt:'Тьма гасит факелы и впивается в сердце!'}}}];
+const PAGEOF=i=>i<2?0:(i<4?1:2);
+const BUFFN={dmg:'урон',shield:'защита',evadeB:'уклонение',critB:'крит',regen:'реген'};
+
+/* ================= СОСТОЯНИЕ ================= */
+let S=null,COM=null,RUN=null,CT=null,VIEW={x:0,y:0,k:1},treeBuilt=false,dragS=null,selR='human',selC='war';
+function save(){try{localStorage.setItem('AS2',JSON.stringify(S))}catch(e){}}
+function log(h,cls){if(!S)return;S.log.unshift({h:h,cls:cls||''});if(S.log.length>80)S.log.pop();renderLog();}
+function toast(h){const t=$('toast');if(!t)return;t.innerHTML=h;t.classList.add('show');clearTimeout(t._x);t._x=setTimeout(()=>t.classList.remove('show'),2400);}
+function shake(el){if(!el)return;el.classList.remove('shake');void el.offsetWidth;el.classList.add('shake');}
+const sp=k=>S&&Object.values(S.hero.eq).some(it=>it&&it.sp===k);
+
+/* ================= ДРЕВО ================= */
+function buildClassTree(){
+ if(!S)return;const cls=S.hero.cls,nodes=[],adj={},byId={};
+ const mk=(id,x,y,si,kind)=>{const nd={id:id,x:x,y:y,si:si,kind:kind};nodes.push(nd);byId[id]=nd;adj[id]=[];return nd;};
+ mk('origin',0,0,-1,'origin');
+ CLASSES[cls].skills.forEach((key,si)=>{
+  const a=(-90+si*60)*Math.PI/180;let prev='origin';
+  [95,150,205,260,315].forEach((dist,ri)=>{
+   const jit=(((si*3+ri*7)%9)-4)*Math.PI/180;
+   const id='r_'+si+'_'+(ri+1);
+   mk(id,Math.cos(a+jit)*dist,Math.sin(a+jit)*dist,si,'rank');
+   adj[prev].push(id);adj[id].push(prev);prev=id;});
+  const mid='m_'+si;
+  mk(mid,Math.cos(a)*388,Math.sin(a)*388,si,'mastery');
+  adj[prev].push(mid);adj[mid].push(prev);});
+ CT={nodes:nodes,adj:adj,byId:byId};}
+function talloc(){return S.hero.talloc;}
+function canAllocCT(id){if(talloc()[id])return false;return CT.adj[id].some(a=>talloc()[a]);}
+function skillRank(si){let r=0;for(let k=1;k<=5;k++){if(talloc()['r_'+si+'_'+k])r=k;else break;}return r;}
+function skillRankByKey(key){const si=CLASSES[S.hero.cls].skills.indexOf(key);return si<0?0:skillRank(si);}
+function hasMastery(si){return !!talloc()['m_'+si];}
+function allocNode(id){if(!CT)return;const nd=CT.byId[id];if(!nd||!canAllocCT(id))return;
+ if(S.hero.pts<1){toast('Недостаточно очков навыков');return;}
+ S.hero.pts--;talloc()[id]=true;
+ const key=CLASSES[S.hero.cls].skills[nd.si];
+ toast((nd.kind==='mastery'?'🌟 Мастерство: ':'📖 Изучено: ')+SKILLDB[key].n);
+ log(nd.kind==='mastery'?'🌟 Мастерство освоено: <b>'+SKILLDB[key].n+'</b>':'📖 Изучено: <b>'+SKILLDB[key].n+'</b>, ранг '+skillRank(nd.si),'good');
+ save();renderTree();renderTop();}
+function spentPts(){return Math.max(0,Object.keys(talloc()).length-2);}
+function refundTree(){const spent=spentPts();if(spent===0){toast('Нечего забывать');return;}
+ const cost=spent*30;if(S.gold<cost){toast('Нужно '+fmt(cost)+' 🪙');return;}
+ S.gold-=cost;S.hero.pts+=spent;S.hero.talloc={origin:true,r_0_1:true};S.cs=null;
+ log('🌀 Ты забываешь выученное. Возвращено очков: '+spent,'sys');save();renderTree();renderTop();}
+function skillEffTxt(key,rank){const sk=SKILLDB[key];const rMul=1+0.15*Math.max(0,rank-1);const parts=[];
+ if(sk.mult){const mult=sk.mult*rMul;parts.push('урон ×'+mult.toFixed(2)+(sk.hits?' ×'+sk.hits:'')+(sk.mag?' (магия)':''));
+  if(S&&S.cs){const est=sk.mag?Math.round(S.cs.spellPow*mult):Math.round((S.cs.dmgMin+S.cs.dmgMax)/2*mult);
+   parts.push('≈ '+fmt(est)+' за попадание');}}
+ if(sk.healPct)parts.push('лечит '+Math.round(sk.healPct*(1+0.12*Math.max(0,rank-1)))+'% ОЗ');
+ if(sk.buff)parts.push(sk.buff.map(b=>'+'+Math.round(b.pct*rMul)+'% '+(BUFFN[b.k]||b.k)+' ('+b.t+' с)').join(', '));
+ if(sk.dot)parts.push('эффект '+sk.dot.pct+'% × '+sk.dot.t+' с');
+ if(sk.selfcost)parts.push('цена: '+sk.selfcost+'% ОЗ');
+ if(sk.exec)parts.push('казнь: порог '+sk.exec+'% ОЗ');
+ if(sk.combo)parts.push('комбо по отравленным');
+ if(sk.debuff)parts.push('метка: +'+sk.debuff.pct+'% урона по врагу');
+ parts.push('мана: '+sk.mp);
+ return parts.join(' · ');}
+
+/* ================= ПЕРСОНАЖ ================= */
+function calcStats(){
+ if(!S)return null;const h=S.hero;
+ const st={str:5,dex:5,int:5,vit:5,luk:3};const mods=[];const race=RACES[h.race];
+ Object.keys(race.b).forEach(k=>st[k]+=race.b[k]);
+ Object.keys(h.bonus||{}).forEach(k=>st[k]+=(h.bonus[k]||0));
+ (race.mods||[]).forEach(m=>mods.push(m));
+ Object.keys(GROW[h.cls]).forEach(k=>st[k]+=Math.floor(h.lvl*GROW[h.cls][k]));
+ const eqSum=k=>Object.values(h.eq).filter(Boolean).reduce((s,it)=>s+((it.mods&&it.mods[k])||0),0);
+ ['str','dex','int','vit','luk'].forEach(k=>st[k]+=eqSum(k));
+ const agg={};mods.forEach(m=>agg[m.k]=(agg[m.k]||0)+m.v);
+ Object.values(h.eq).filter(Boolean).forEach(it=>Object.keys(it.mods||{}).forEach(k=>agg[k]=(agg[k]||0)+it.mods[k]));
+ if(S.buff)Object.keys(S.buff.mods).forEach(k=>agg[k]=(agg[k]||0)+S.buff.mods[k]);
+ // самоцветы
+ const res={fire:0,poison:0,ice:0,light:0,shadow:0};
+ const wg={fire:0,poison:0,ice:0,light:0,burnCh:0,poisonCh:0,slow:false,critB:0,leechB:0,dmgB:0};
+ const gemMap={ruby:'fire',emerald:'poison',sapphire:'ice',topaz:'light',onyx:'shadow'};
+ Object.values(h.eq).filter(Boolean).forEach(it=>{(it.gems||[]).forEach(g=>{if(!g)return;
+  if(it.slot==='weapon'){
+   if(g==='ruby'){wg.fire+=20;wg.burnCh=20;}
+   else if(g==='emerald'){wg.poison+=20;wg.poisonCh=25;}
+   else if(g==='sapphire'){wg.ice+=20;wg.slow=true;}
+   else if(g==='topaz'){wg.light+=15;wg.critB+=5;}
+   else if(g==='onyx'){wg.leechB+=6;}
+   else if(g==='diamond'){wg.dmgB+=10;}}
+  else{
+   if(g==='diamond'){Object.keys(res).forEach(k=>res[k]+=8);}
+   else if(gemMap[g])res[gemMap[g]]+=12;}});});
+ Object.keys(res).forEach(k=>{res[k]=Math.min(60,res[k]+(agg['res'+k]||0));});
+ const lvl=h.lvl,o={};
+ o.str=st.str;o.dex=st.dex;o.int=st.int;o.vit=st.vit;o.luk=st.luk;
+ o.hpPct=agg.hp||0;o.mpAdd=agg.mp||0;o.phys=agg.phys||0;o.spell=agg.spell||0;
+ o.dmgAll=(agg.dmg||0)+wg.dmgB;
+ o.crit=Math.max(0,5+st.dex*0.35+(agg.crit||0)+wg.critB);o.critd=150+(agg.critd||0);
+ o.armorPct=agg.armor||0;o.evade=Math.min(45,st.dex*0.3+(agg.evade||0));
+ o.leech=(agg.leech||0)+wg.leechB;o.gf=agg.gf||0;o.mf=agg.mf||0;o.xpB=agg.xp||0;o.spd=agg.spd||0;
+ o.res=res;o.wg=wg;
+ const w=h.eq.weapon;
+ const wDmg=w&&w.baseDmg?w.baseDmg*(1+(w.enh||0)*0.18):2;
+ const enh=w?1+(w.enh||0)*0.08:1;
+ const physMul=(1+o.phys/100);
+ o.dmgMin=Math.max(1,Math.round((wDmg*0.8+st.str*1.1+lvl*0.6)*enh*physMul*(1+o.dmgAll/100))||2);
+ o.dmgMax=Math.max(o.dmgMin+1,Math.round((wDmg*1.2+st.str*1.5+lvl*0.9)*enh*physMul*(1+o.dmgAll/100))||3);
+ o.spellPow=Math.max(1,Math.round((8+st.int*1.4+lvl*0.8)*(1+o.spell/100)*(1+o.dmgAll/100))||2);
+ o.armor=Math.max(0,Math.round((st.vit*0.5+eqSum('armorFlat')+lvl*0.5)*(1+Math.max(-60,o.armorPct)/100)));
+ o.maxhp=Math.max(10,Math.round((46+st.vit*9+lvl*7)*(1+o.hpPct/100)));
+ o.maxmp=Math.max(5,Math.round(18+st.int*5+lvl*3+o.mpAdd));
+ h.hp=Math.min(h.hp,o.maxhp);h.mp=Math.min(h.mp,o.maxmp);
+ S.cs=o;return o;}
+function addStat(k){if(!S||S.hero.sp<1)return;S.hero.sp--;S.hero.bonus[k]++;S.cs=null;calcStats();
+ log('Характеристика повышена: <b>'+STATS[k]+'</b>','good');save();renderHero();renderTop();}
+function respecStats(){const total=Object.values(S.hero.bonus).reduce((a,b)=>a+b,0);
+ if(!total){toast('Очки не распределены');return;}
+ const cost=50+S.hero.lvl*10;if(S.gold<cost){toast('Нужно '+fmt(cost)+' 🪙');return;}
+ S.gold-=cost;S.hero.sp+=total;S.hero.bonus={str:0,dex:0,int:0,vit:0,luk:0};S.cs=null;calcStats();
+ log('🌀 Наставник помогает переосмыслить себя. Возвращено очков: '+total,'sys');save();renderHero();renderTop();}
+function xpNeed(l){return Math.round(38*Math.pow(l,1.65));}
+function gainXP(n){const h=S.hero;const c=S.cs||calcStats();n=Math.round(n*(1+c.xpB/100));h.xp+=n;log('Получено опыта: <b>'+fmt(n)+'</b>','sys');
+ while(h.xp>=xpNeed(h.lvl)){h.xp-=xpNeed(h.lvl);h.lvl++;h.pts+=1;h.sp+=3;const cs=calcStats();h.hp=cs.maxhp;h.mp=cs.maxmp;
+  toast('⚜ УРОВЕНЬ '+h.lvl+'! +1 очко навыков, +3 очка характеристик');
+  log('⚜ Достигнут <b>'+h.lvl+'</b> уровень! +1 очко навыков, +3 очка характеристик','good');}
+ renderTop();save();}
+function gainGold(n){const c=S.cs||calcStats();n=Math.round(n*(1+c.gf/100));S.gold+=n;return n;}
+
+/* ================= ЛУТ ================= */
+function rollAffix(lvl,mfB){const r=Math.random()*100*(1+(mfB||0)/100);let rar=0;
+ if(r>96)rar=4;else if(r>86)rar=3;else if(r>66)rar=2;else if(r>38)rar=1;
+ if(lvl>=10&&rar===0&&Math.random()<0.15)rar=1;return rar;}
+function genItem(zoneLv,mf,forceRar,slots){
+ let pool=BASES.filter(b=>b.lv<=zoneLv+2);
+ if(slots&&slots.length)pool=pool.filter(b=>slots.includes(b.s));
+ if(!pool.length)pool=BASES;
+ const base=P(pool.slice(-8));
+ const rar=forceRar!==undefined?forceRar:rollAffix(zoneLv,mf);
+ const counts=[0,RI(1,2),RI(3,4),RI(5,6),RI(6,7)][rar];
+ const used=new Set(),affNames=[];
+ const pickFrom=(arr)=>{const cand=arr.filter(a=>!used.has(a.k));if(!cand.length)return;const a=P(cand);used.add(a.k);
+  const v=Math.max(1,Math.round(R(a.v[0],a.v[1])*(0.7+zoneLv*0.06)));affNames.push({n:a.n,k:a.k,v:v});};
+ for(let i=0;i<Math.ceil(counts/2);i++)pickFrom(PRE);
+ const sufPool=base.s==='weapon'?SUF:SUF2;
+ while(used.size<counts)pickFrom(Math.random()<0.5?PRE:sufPool);
+ let nm=base.nm[RI(0,base.nm.length-1)];
+ if(rar===1&&affNames[0])nm=affNames[0].n+' '+nm.charAt(0).toLowerCase()+nm.slice(1);
+ if(rar===2)nm=nm+' «'+P(['Волка','Пепла','Луны','Крови','Бури','Пустоты','Зари','Врана','Шипа','Пламени'])+'»';
+ if(rar>=3)nm=P(LEGN);
+ const it={id:uid(),slot:base.s,nm:nm,icon:base.icon,rar:rar,lvl:Math.max(1,zoneLv+RI(-1,1)),enh:0,mods:{},gems:[],sockets:0};
+ affNames.forEach(a=>{it.mods[a.k]=(it.mods[a.k]||0)+a.v;});
+ if(base.dmg)it.baseDmg=RI(base.dmg[0],base.dmg[1]);else it.armorFlat=Math.round((base.arm||2)*(1+zoneLv*0.25));
+ if(rar===4)it.sockets=2;else if(rar===3)it.sockets=RI(1,2);else if(rar===2&&Math.random()<0.5)it.sockets=1;
+ return it;}
+function makeUnique(u){return{id:uid(),slot:u.slot,nm:u.nm,icon:u.icon,rar:4,lvl:u.lvl,enh:0,unique:true,
+ mods:Object.assign({},u.mods),sp:u.sp,spd:u.spd,gems:[],sockets:2,
+ baseDmg:u.bd?RI(u.bd[0],u.bd[1]):undefined,armorFlat:u.arm||undefined};}
+function makeZoneItem(zi){const d=P(ZONE_SET[zi]);
+ return{id:uid(),slot:d.slot,nm:d.nm,icon:d.slot==='weapon'?'🗡️':'🛡',rar:3,lvl:d.lv,enh:0,set:true,
+ mods:Object.assign({},d.mods),gems:[],sockets:1,spd:'Набор: '+ZONES[zi].nm,
+ baseDmg:d.bd?RI(d.bd[0],d.bd[1]):undefined,armorFlat:d.arm||undefined};}
+function sellPrice(it){return Math.round(((8+it.lvl*5)*(1+Object.keys(it.mods).length*0.55)*RMUL[it.rar]*0.5+(it.enh||0)*14)*(it.unique?2:1));}
+function socketLine(it){let s='◈'.repeat(it.sockets||0);const g=(it.gems||[]).filter(Boolean).length;return it.sockets?('· гнёзда '+g+'/'+it.sockets):'';}
+function itemHtml(it){
+ const req=S.hero.lvl<it.lvl?' <span style="color:var(--blood)">(нужен ур. '+it.lvl+')</span>':'';
+ const base=it.baseDmg?'⚔ Урон ~'+Math.round(it.baseDmg*(1+(it.enh||0)*0.18)):'🛡 Броня '+Math.round((it.armorFlat||0)*(1+(it.enh||0)*0.08));
+ const en=it.enh?' <b class="c2">+'+it.enh+'</b>':'';
+ const af=Object.keys(it.mods).map(k=>modStr(k,it.mods[k])).join(' · ');
+ return '<div class="item r'+it.rar+'" onclick="itemMenu(\''+it.id+'\')">'
+ +'<div style="font-size:22px">'+it.icon+'</div>'
+ +'<div style="flex:1"><div class="nm '+RC[it.rar]+'">'+it.nm+en+req+'</div>'
+ +'<div class="ds">'+(it.unique?'УНИКАЛЬНЫЙ':RAR[it.rar])+' · ур. '+it.lvl+' · '+(SLOTN[it.slot]||'предмет')+' · '+base+' '+socketLine(it)+'</div>'
+ +(af?'<div class="af">✦ '+af+'</div>':'')
+ +(it.spd?'<div class="spl">✧ '+it.spd+'</div>':'')+'</div>'
+ +'<div class="eq">💰 '+fmt(sellPrice(it))+'</div></div>';}
+
+/* ================= ИНВЕНТАРЬ / ГНЁЗДА ================= */
+function addItem(it){S.hero.inv.push(it);if(it.rar>=3)toast('✦ '+(it.unique?'УНИКАЛЬНЫЙ':RAR[it.rar].toUpperCase())+': '+it.nm+'!');
+ log('Лут: <span class="'+RC[it.rar]+'">'+it.nm+'</span> ('+(it.unique?'уникальный':RAR[it.rar].toLowerCase())+')',it.rar>=2?'loot':'');}
+function findItem(id){const i=S.hero.inv.findIndex(x=>x.id===id);if(i>=0)return{it:S.hero.inv[i],from:'inv',i:i};
+ for(const s in S.hero.eq)if(S.hero.eq[s]&&S.hero.eq[s].id===id)return{it:S.hero.eq[s],from:'eq',s:s};return null;}
+function itemMenu(id){const f=findItem(id);if(!f)return;const it=f.it;
+ const eqBtn=f.from==='inv'?'<button class="btn" onclick="equipItem(\''+id+'\')">Надеть</button>':'<button class="btn" onclick="unequipItem(\''+it.slot+'\')">Снять</button>';
+ let sock='';
+ if(it.sockets){sock='<div style="margin-top:10px"><div style="font-weight:700;color:var(--gold);letter-spacing:.1em;margin-bottom:6px">ГНЁЗДА ('+it.sockets+')</div>';
+  for(let i=0;i<it.sockets;i++){const g=it.gems&&it.gems[i];
+   if(g)sock+='<span class="gemchip" onclick="removeGem(\''+id+'\','+i+')" title="Вынуть">'+GEMS[g].icon+' '+GEMS[g].n+' ✕</span>';
+   else{const opts=Object.keys(GEMS).filter(k=>(S.hero.gems[k]||0)>0);
+    if(opts.length){sock+='<span style="display:inline-flex;gap:4px;align-items:center;margin:2px"><select class="gsel" id="gsel_'+i+'">'
+     +opts.map(k=>'<option value="'+k+'">'+GEMS[k].icon+' '+GEMS[k].n+' ×'+S.hero.gems[k]+'</option>').join('')
+     +'</select><button class="btn small" onclick="socketGem(\''+id+'\','+i+')">Вставить</button></span>';}
+    else sock+='<span style="color:var(--dim2);font-size:12px;margin:2px;display:inline-block">пустое гнездо (самоцветов нет)</span>';}}
+  sock+='<div style="font-size:11px;color:var(--dim2);margin-top:4px">Самоцвет в оружии даёт атакующий эффект, в броне — сопротивление.</div></div>';}
+ $('main').innerHTML='<div class="panel"><h2 class="pt">'+it.icon+' '+it.nm+'</h2><div class="sub">'+(it.unique?'УНИКАЛЬНЫЙ':RAR[it.rar])+' · '+(SLOTN[it.slot]||'предмет')+' · уровень предмета '+it.lvl+(it.enh?' · заточка +'+it.enh:'')+'</div>'
+ +(Object.keys(it.mods).map(k=>'<div class="statline"><span>✦ '+modStr(k,it.mods[k])+'</span></div>').join('')||'<div class="sub">Без особых свойств.</div>')
+ +(it.spd?'<div class="statline"><span style="color:var(--gold2)">✧ '+it.spd+'</span></div>':'')
+ +sock
+ +'<div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">'+eqBtn
+ +' <button class="btn" onclick="show(\'forge\')">⚒ В кузницу</button>'
+ +' <button class="btn danger" onclick="sellItem(\''+id+'\')">Продать ('+fmt(sellPrice(it))+' 🪙)</button>'
+ +' <button class="btn" onclick="show(S.page)">Назад</button></div></div>';}
+function socketGem(itId,idx){const sel=$('gsel_'+idx);const g=sel&&sel.value;
+ if(!g||!(S.hero.gems[g]>0)){toast('Нет самоцветов');return;}
+ const f=findItem(itId);if(!f)return;const it=f.it;
+ if(!it.gems)it.gems=[];
+ if(it.gems[idx])S.hero.gems[it.gems[idx]]++;
+ it.gems[idx]=g;S.hero.gems[g]--;S.cs=null;
+ log('💎 Самоцвет вставлен: '+GEMS[g].n+' → '+it.nm,'good');
+ save();itemMenu(itId);renderTop();}
+function removeGem(itId,idx){const f=findItem(itId);if(!f)return;const it=f.it;
+ const g=it.gems&&it.gems[idx];if(!g)return;
+ S.hero.gems[g]++;it.gems[idx]=null;S.cs=null;
+ log('Самоцвет вынут: '+GEMS[g].n,'sys');save();itemMenu(itId);renderTop();}
+function equipItem(id){const f=findItem(id);if(!f||f.from!=='inv')return;const it=f.it;
+ if(it.orb){toast('Это нельзя надеть');return;}
+ if(S.hero.lvl<it.lvl){toast('Требуется '+it.lvl+' уровень');return;}
+ S.hero.inv.splice(f.i,1);const old=S.hero.eq[it.slot];if(old)S.hero.inv.push(old);
+ S.hero.eq[it.slot]=it;S.cs=null;log('Надето: <span class="'+RC[it.rar]+'">'+it.nm+'</span>','good');save();renderAll();}
+function unequipItem(slot){const it=S.hero.eq[slot];if(!it)return;S.hero.eq[slot]=null;S.hero.inv.push(it);S.cs=null;save();renderAll();}
+function sellItem(id){const f=findItem(id);if(!f)return;const g=sellPrice(f.it);S.gold+=g;
+ if(f.from==='inv')S.hero.inv.splice(f.i,1);else{S.hero.eq[f.s]=null;S.cs=null;}
+ log('Продано за <b>'+fmt(g)+'</b> 🪙','loot');save();show(S.page);renderTop();}
+function troInfo(key){const parts=key.split('_');const zi=+parts[0];
+ if(parts[1]==='b'){const b=BOSS_TROPH[zi];return{nm:b.nm,icon:b.icon,zi:zi,price:25+zi*15};}
+ const t=TROPH[zi][+parts[1]];return{nm:t.nm,icon:t.icon,zi:zi,price:4+zi*4};}
+function sellTroph(key,all){const n=S.hero.troph[key]||0;if(!n)return;
+ const cnt=all?n:1;const inf=troInfo(key);const g=inf.price*cnt;
+ S.hero.troph[key]-=cnt;S.gold+=g;
+ log('Продано: '+inf.nm+' ×'+cnt+' за <b>'+fmt(g)+'</b> 🪙','loot');save();renderInv();renderTop();}
+
+/* ================= ЗАКАЗЫ ================= */
+function unlockedZones(){const u=[];for(let i=0;i<5;i++)if(i===0||S.hero.bosses[i-1])u.push(i);return u;}
+function genOrder(){
+ const zs=unlockedZones();const zi=P(zs);const roll=Math.random();let o;
+ if(roll<0.4)o={type:'kill',zi:zi,n:RI(6,12)};
+ else if(roll<0.6)o={type:'boss',zi:zi,n:1};
+ else if(roll<0.8)o={type:'dungeon',zi:zi,n:1};
+ else o={type:'enh',zi:0,n:RI(2,4)};
+ o.id=uid();o.prog=0;
+ if(o.type==='kill'){o.gold=(zi+1)*30+o.n*7;o.xp=(zi+1)*50+o.n*12;o.frag=RI(1,2);}
+ else if(o.type==='boss'){o.gold=(zi+1)*120;o.xp=(zi+1)*180;o.frag=RI(4,8);o.item=true;}
+ else if(o.type==='dungeon'){o.gold=(zi+1)*90;o.xp=(zi+1)*120;o.frag=RI(3,6);}
+ else{o.gold=90*o.n;o.xp=60*o.n;o.frag=o.n;}
+ return o;}
+function orderInfo(o){const z=ZONES[o.zi];
+ if(o.type==='kill')return{ic:'⚔',t:'Истребление: '+z.nm,d:'Убей '+o.n+' врагов в локации «'+z.nm+'».'};
+ if(o.type==='boss')return{ic:'☠',t:'Охота за головой',d:'Срази хранителя: '+z.boss.n+' (в поединке или данже).'};
+ if(o.type==='dungeon')return{ic:'🕳️',t:'Зачистка',d:'Пройди данж «'+z.nm+'» до конца.'};
+ return{ic:'⚒',t:'Работа кузнеца',d:'Успешно заточи снаряжение '+o.n+' раз(а).'};}
+function claimOrder(i){const o=S.board.orders[i];if(!o||o.prog<o.n)return;
+ S.gold+=o.gold;S.frag+=o.frag;
+ log('📜 Заказ выполнен! Награда: <b>'+fmt(o.gold)+'</b> 🪙, '+fmt(o.frag)+' ◆','loot');
+ if(o.item)addItem(genItem(ZONES[o.zi].lv+3,(S.cs||calcStats()).mf,RI(2,3)));
+ gainXP(o.xp);
+ S.board.orders[i]=genOrder();
+ toast('📜 Заказ сдан. Доска обновлена.');save();renderAll();}
+function rerollBoard(){if(S.gold<30){toast('Нужно 30 🪙');return;}
+ S.gold-=30;S.board.orders=S.board.orders.map(o=>o.prog>=o.n?o:genOrder());
+ log('📜 Доска заказов обновлена.','sys');save();renderAll();}
+function trackKill(zi){if(!S.board)return;let r=false;S.board.orders.forEach(o=>{if(o.type==='kill'&&o.zi===zi&&o.prog<o.n){o.prog++;if(o.prog>=o.n)r=true;}});if(r)toast('📜 Заказ выполнен — вернись к доске!');}
+function trackBoss(zi){if(!S.board)return;let r=false;S.board.orders.forEach(o=>{if(o.type==='boss'&&o.zi===zi&&o.prog<o.n){o.prog++;r=true;}});if(r)toast('📜 Заказ выполнен — вернись к доске!');}
+function trackDungeon(zi){if(!S.board)return;let r=false;S.board.orders.forEach(o=>{if(o.type==='dungeon'&&o.zi===zi&&o.prog<o.n){o.prog++;r=true;}});if(r)toast('📜 Заказ выполнен — вернись к доске!');}
+function trackEnh(){if(!S.board)return;let r=false;S.board.orders.forEach(o=>{if(o.type==='enh'&&o.prog<o.n){o.prog++;if(o.prog>=o.n)r=true;}});if(r)toast('📜 Заказ выполнен — вернись к доске!');}
+
+/* ================= МАГАЗИН ================= */
+function genShopStock(){const lvl=Math.max(1,S.hero.lvl);const mf=(S.cs&&S.cs.mf)||0;const arr=[];
+ arr.push(genItem(lvl+1,mf,P([1,1,2,2]),['weapon']));
+ arr.push(genItem(lvl+1,mf,P([1,2,2]),['weapon']));
+ arr.push(genItem(lvl+1,mf,P([1,1,2,2]),['helmet','armor','gloves','boots']));
+ arr.push(genItem(lvl+1,mf,P([1,2,2]),['helmet','armor','gloves','boots']));
+ arr.push(genItem(lvl+1,mf,P([1,2]),['amulet','ring']));
+ if(Math.random()<0.06)arr.push(makeUnique(P(UNIQUES)));
+ else arr.push(genItem(lvl+1,mf,P([1,2,3]),['amulet','ring','weapon']));
+ return arr;}
+function stockPrice(it){return Math.round(sellPrice(it)*(it.unique?3:2.2));}
+function buyStock(i){const it=S.shopStock[i];if(!it)return;const pr=stockPrice(it);
+ if(S.gold<pr){toast('Недостаточно золота');return;}
+ S.gold-=pr;S.shopStock.splice(i,1);addItem(it);
+ log('Куплено в лавке: <span class="'+RC[it.rar]+'">'+it.nm+'</span> за '+fmt(pr)+' 🪙','loot');
+ save();renderShop();renderTop();}
+function refreshStock(){if(S.gold<25){toast('Нужно 25 🪙');return;}
+ S.gold-=25;S.shopStock=genShopStock();log('🛒 Борг выкладывает новый товар.','sys');save();renderShop();renderTop();}
+
+/* ================= МАСТЕРСКАЯ ================= */
+function troCount(zi){return (S.hero.troph[zi+'_0']||0)+(S.hero.troph[zi+'_1']||0);}
+function totalTroph(){return Object.keys(S.hero.troph).filter(k=>!k.endsWith('_b')).reduce((s,k)=>s+S.hero.troph[k],0);}
+function bTrophCount(){return Object.keys(S.hero.troph).filter(k=>k.endsWith('_b')).reduce((s,k)=>s+S.hero.troph[k],0);}
+function consumeAnyTroph(n){const keys=Object.keys(S.hero.troph).filter(k=>!k.endsWith('_b')&&S.hero.troph[k]>0);
+ for(const k of keys){if(n<=0)break;const t=Math.min(S.hero.troph[k],n);S.hero.troph[k]-=t;n-=t;}return n<=0;}
+function consumeBTroph(n){const keys=Object.keys(S.hero.troph).filter(k=>k.endsWith('_b')&&S.hero.troph[k]>0);
+ for(const k of keys){if(n<=0)break;const t=Math.min(S.hero.troph[k],n);S.hero.troph[k]-=t;n-=t;}return n<=0;}
+function crushTroph(key){if((S.hero.troph[key]||0)<3){toast('Нужно 3 трофея');return;}
+ S.hero.troph[key]-=3;S.frag++;log('◆ Три трофея расколоты в осколок силы.','loot');save();renderForge();renderTop();}
+function craft(zi,type){const need={weapon:{t:10,f:2,g:50*(zi+1)},armor:{t:8,f:1,g:40*(zi+1)},trinket:{t:6,f:1,g:30*(zi+1)}}[type];
+ if(troCount(zi)<need.t){toast('Не хватает трофеев');return;}
+ if(S.frag<need.f){toast('Не хватает осколков');return;}
+ if(S.gold<need.g){toast('Не хватает золота');return;}
+ consumeTroph(zi,need.t);S.frag-=need.f;S.gold-=need.g;
+ const mf=(S.cs||calcStats()).mf;let it;
+ if(type==='weapon')it=genItem(ZONES[zi].lv+2,mf,2,['weapon']);
+ else if(type==='armor')it=genItem(ZONES[zi].lv+2,mf,2,['helmet','armor','gloves','boots']);
+ else it=genItem(ZONES[zi].lv+2,mf,RI(1,2),['amulet','ring']);
+ addItem(it);log('⚒ Мастерская: трофеи «'+ZONES[zi].nm+'» превращаются в <span class="'+RC[it.rar]+'">'+it.nm+'</span>','loot');
+ save();renderForge();renderTop();}
+
+/* ================= АЛХИМИЯ ================= */
+function brew(id){const r=RECIPES.find(x=>x.id===id);if(!r)return;
+ if(S.gold<r.gold){toast('Не хватает золота');return;}
+ if(r.tro&&totalTroph()<r.tro){toast('Нужно '+r.tro+' обычных трофея');return;}
+ if(r.btro&&bTrophCount()<r.btro){toast('Нужно '+r.btro+' трофея боссов');return;}
+ if(r.frag&&S.frag<r.frag){toast('Не хватает осколков');return;}
+ S.gold-=r.gold;
+ if(r.tro)consumeAnyTroph(r.tro);
+ if(r.btro)consumeBTroph(r.btro);
+ if(r.frag)S.frag-=r.frag;
+ if(r.out.pot){S.hero.pots[r.out.pot]++;log('⚗ Сварено: '+r.n,'good');}
+ if(r.out.elix){S.hero.elix[r.out.elix]++;log('⚗ Сварено: '+r.n,'good');}
+ if(r.out.prot){S.hero.prot++;log('⚒ Вырезан Камень-оберег','good');}
+ if(r.out.gem){const gk=P(Object.keys(GEMS));S.hero.gems[gk]=(S.hero.gems[gk]||0)+1;log('💎 Выпал самоцвет: '+GEMS[gk].n,'loot');toast('💎 '+GEMS[gk].n);}
+ save();renderAlch();renderTop();}
+
+/* ================= БОЙ ================= */
+function makeEnemy(zi,elite){const z=ZONES[zi];const m=P(z.mobs);const el=elite?2.0:1;const l=z.lv+RI(0,3);
+ const e={n:m.n,f:m.f,lv:l,boss:false,elite:!!elite,hp:0,maxhp:Math.round((26+l*18)*el),dmg:(4.5+l*2.6)*(elite?1.3:1),
+  xp:Math.round(l*13*el+z.lv*4),gold:l*3+RI(0,l*3),stun:0,dot:0,dotD:0,dotEl:null,buffs:[],debuff:null,trait:null,elem:null,atkN:0,slow:false,
+  arm:Math.round(l*6*(elite?1.3:1)),sp:Math.random()<0.5?P(SPEC):null};
+ const tr=Math.random();
+ if((elite&&tr<0.4)||(!elite&&tr<0.18)){e.trait=P(TRAITS);e.maxhp=Math.round(e.maxhp*1.35);e.xp=Math.round(e.xp*1.5);e.gold=Math.round(e.gold*1.5);
+  if(e.trait.k==='venom')e.elem='poison';else if(e.trait.k==='burn')e.elem='fire';}
+ if(!e.elem&&elite&&Math.random()<0.4)e.elem=P(Object.keys(ELEMS));
+ return e;}
+function makeBoss(zi){const z=ZONES[zi];const l=z.lv+4;
+ return{n:z.boss.n,f:z.boss.f,lv:l,boss:true,hp:0,maxhp:Math.round((26+l*18)*5),dmg:(4.5+l*2.6)*1.3,
+  xp:Math.round(l*13*6+z.lv*20),gold:l*18+80,stun:0,dot:0,dotD:0,dotEl:null,buffs:[],debuff:null,trait:null,elem:ZONE_ELEM[zi],atkN:0,slow:false,
+  arm:l*12,sp:Object.assign({},z.boss.sp),enr:false};}
+function startCombat(enemy,ctx){COM={e:enemy,ctx:ctx,over:false,pbuffs:[],pdot:null,t:0,sec:0,pAtk:0,eAtk:0,gcd:0,potCd:0,cd:{},iv:null};
+ COM.e.hp=COM.e.maxhp;S.page='combat';
+ if(enemy.boss)log('🔥 <b>'+enemy.n+'</b> выходит из мрака. '+ZONES[ctx.zi].boss.ds,'bad');
+ else if(enemy.trait)log(enemy.trait.icon+' Впереди <b>'+enemy.n+'</b> — '+enemy.trait.n.toLowerCase()+' противник!','bad');
+ render();
+ COM.iv=setInterval(combatTick,250);}
+function stopCombat(){if(COM&&COM.iv){clearInterval(COM.iv);COM.iv=null;}}
+function feed(h,c){const f=$('cfeed');if(!f)return;const p=document.createElement('p');p.className=c||'p';p.innerHTML=h;f.appendChild(p);
+ while(f.children.length>60)f.removeChild(f.firstChild);
+ f.scrollTop=f.scrollHeight;}
+function eDmgMul(){const e=COM.e;let m=1;e.buffs.forEach(b=>{if(b.k==='dmg')m+=b.pct/100;});return m;}
+function critChance(){let cr=S.cs.crit;if(COM)COM.pbuffs.forEach(b=>{if(b.k==='critB')cr+=b.pct;});return cr;}
+function dodgeChance(){let d=S.cs.evade;if(COM)COM.pbuffs.forEach(b=>{if(b.k==='evadeB')d+=b.pct;});return Math.min(70,d);}
+function pInterval(){let pb=1;if(COM)COM.pbuffs.forEach(b=>{if(b.k==='swiftB')pb=Math.max(0.5,1-b.pct/100);});
+ return Math.max(900,2200*(1-(S.cs.spd||0)/200)*pb);}
+function elemRes(el){return Math.min(0.6,((S.cs&&S.cs.res[el])||0)/100);}
+function dmgToPlayer(raw){let a=S.cs.armor;COM.pbuffs.forEach(b=>{if(b.k==='armor')a*=(1+b.pct/100);});
+ let red=a/(a+40+COM.e.lv*18);let d=raw*(1-red);
+ COM.pbuffs.forEach(b=>{if(b.k==='shield')d*=(1-b.pct/100);});
+ if(sp('oath')&&S.hero.hp<S.cs.maxhp*0.3)d*=0.8;
+ return Math.max(1,d);}
+function enemyStrike(mult){const e=COM.e;const raw=e.dmg*mult*eDmgMul()*R(0.85,1.15);
+ if(e.elem){const res=elemRes(e.elem);
+  return Math.round(dmgToPlayer(raw*0.6)+Math.max(1,raw*0.4*(1-res)));}
+ return Math.round(dmgToPlayer(raw));}
+function applyEnemyMods(d,sk){const e=COM.e;
+ const defB=e.buffs.find(b=>b.k==='def');if(defB)d*=(1-defB.pct/100);
+ if(e.trait&&e.trait.k==='stone'&&!sk.pierce)d*=0.65;
+ if(e.trait&&e.trait.k==='curse')d*=0.8;
+ if(e.debuff)d*=(1+e.debuff.pct/100);
+ if(e.boss&&sp('reap'))d*=1.3;
+ const eArm=(e.arm||0)*(sk.pierce?0.5:1);
+ d*=(1-eArm/(eArm+120+S.hero.lvl*12));
+ return Math.max(1,Math.round(d));}
+function onPlayerDealtDmg(e,d){if(e.trait&&e.trait.k==='vamp'){const vh=Math.max(1,Math.round(d*0.3));e.hp=Math.min(e.maxhp,e.hp+vh);}}
+function floatDmg(elId,txt,cls){const el=$(elId);if(!el)return;const s=document.createElement('span');s.className='float '+(cls||'');s.textContent=txt;el.appendChild(s);setTimeout(()=>s.remove(),950);}
+function weaponProcs(base,e){const wg=S.cs.wg;const fx=[];
+ if(wg.burnCh&&Math.random()*100<wg.burnCh){e.dot=Math.max(e.dot,3);e.dotD=Math.max(e.dotD,Math.max(1,Math.round(base*0.12)));e.dotEl='fire';fx.push('🔥 поджог');}
+ if(wg.poisonCh&&Math.random()*100<wg.poisonCh){e.dot=Math.max(e.dot,3);e.dotD=Math.max(e.dotD,Math.max(1,Math.round(base*0.12)));e.dotEl='poison';fx.push('☠ отрава');}
+ if(wg.slow&&!e.slow){e.slow=true;fx.push('❄ замедление');}
+ return fx;}
+function elemBonus(d){const wg=S.cs.wg;const sum=wg.fire+wg.poison+wg.ice+wg.light;
+ return sum>0?Math.round(d*sum/100):0;}
+function autoAttack(){if(!COM||COM.over)return;doPlayerHit(1,'бьёт',0);}
+function doPlayerHit(mult,verb,extraCrit){if(!COM)return;const c=S.cs,h=S.hero,e=COM.e;
+ let base=Math.round(R(c.dmgMin,c.dmgMax)*mult);
+ if(h.race==='orc'&&h.hp<c.maxhp*0.35)base=Math.round(base*1.25);
+ let pb=1;COM.pbuffs.forEach(b=>{if(b.k==='dmg')pb+=b.pct/100;});base=Math.round(base*pb);
+ const crit=Math.random()*100<critChance()+extraCrit;
+ let d=applyEnemyMods(Math.round(base*(crit?c.critd/100:1)),{});
+ const eb=elemBonus(d);
+ e.hp-=d+eb;onPlayerDealtDmg(e,d+eb);
+ feed('⚔ '+h.name+' '+verb+': <b>'+fmt(d)+'</b>'+(eb?' <span style="color:#9fd0c8">+'+fmt(eb)+' стихии</span>':'')+(crit?' <span class="c">КРИТ!</span>':''),crit?'c':'p');
+ floatDmg('eface','-'+fmt(d+eb),crit?'crit':'');shake($('ecard'));
+ const fx=weaponProcs(base,e);if(fx.length)feed('💎 '+fx.join(', '),'s');
+ if(sp('tear')&&e.hp>0){e.dot=Math.max(e.dot,3);e.dotD=Math.max(e.dotD,Math.max(1,Math.round(base*0.08)));e.dotEl='poison';}
+ if(sp('vulcan')&&e.hp>0){e.dot=Math.max(e.dot,3);e.dotD=Math.max(e.dotD,Math.max(1,Math.round(base*0.1)));e.dotEl='fire';}
+ if(crit&&sp('wolf')){const wh=Math.round(c.maxhp*0.05);h.hp=Math.min(c.maxhp,h.hp+wh);floatDmg('pface','+'+fmt(wh),'heal');}
+ if(c.leech>0){const lh=Math.round((d+eb)*c.leech/100);if(lh>0){h.hp=Math.min(c.maxhp,h.hp+lh);}}
+ if(e.hp<=0)return onWin();
+ renderTop();}
+function useSkill(key){if(!COM||COM.over||S.page!=='combat')return;
+ const cls=S.hero.cls,si=CLASSES[cls].skills.indexOf(key),sk=SKILLDB[key];
+ if(si<0||!sk)return;const rank=skillRank(si),mast=hasMastery(si);
+ if(rank<1)return;const h=S.hero,c=S.cs;
+ if((COM.cd[key]||0)>0||COM.gcd>0)return;
+ if(h.mp<sk.mp){feed('Недостаточно маны!','s');return;}
+ h.mp-=sk.mp;COM.cd[key]=cdFor(rank,mast);COM.gcd=900;
+ const rMul=1+0.15*(rank-1);
+ if(sk.selfcost){const cost=Math.round(c.maxhp*sk.selfcost/100);h.hp=Math.max(1,h.hp-cost);feed('🩸 Цена крови: −'+fmt(cost)+' ОЗ','e');}
+ if(sk.healPct){let pct=sk.healPct*(1+0.12*(rank-1));if(mast&&sk.m&&sk.m.healPct)pct=sk.m.healPct;
+  const am=Math.round(c.maxhp*pct/100);h.hp=Math.min(c.maxhp,h.hp+am);
+  feed('🕊 '+h.name+' '+sk.txt+': <b>+'+fmt(am)+'</b> ОЗ','c');floatDmg('pface','+'+fmt(am),'heal');renderTop();return;}
+ if(sk.buff){const extra=(mast&&sk.m&&sk.m.buffT)?sk.m.buffT:0;
+  sk.buff.forEach(b=>COM.pbuffs.push({k:b.k,pct:Math.round(b.pct*rMul),t:b.t+extra}));
+  feed('✦ '+h.name+' '+sk.txt,'c');
+  if(mast&&sk.m&&sk.m.healPct){const am=Math.round(c.maxhp*sk.m.healPct/100);h.hp=Math.min(c.maxhp,h.hp+am);feed('✚ Мастерство лечит: +'+fmt(am)+' ОЗ','c');}
+  renderTop();return;}
+ const e=COM.e;
+ let mult=(sk.mult||1)*rMul;
+ let base=sk.mag?Math.round(c.spellPow*mult):Math.round(R(c.dmgMin,c.dmgMax)*mult);
+ let hits=sk.hits||1;if(mast&&sk.m&&sk.m.hits)hits=sk.m.hits;
+ let cb=sk.cb||0;if(mast&&sk.m&&sk.m.cb)cb+=sk.m.cb;
+ const critdB=(mast&&sk.m&&sk.m.critd)?sk.m.critd:0;
+ let execTh=sk.exec||0;if(mast&&sk.m&&sk.m.exec)execTh=sk.m.exec;
+ if(execTh&&e.hp<=e.maxhp*execTh/100){base=Math.round(base*1.6);feed('⚖ Порог казни!','c');}
+ if(sk.combo==='poison'&&e.dot>0){base=Math.round(base*((mast&&sk.m&&sk.m.combo)?sk.m.combo:1.8));feed('☣ Комбо по отравленному!','c');}
+ let dealt=0;
+ for(let i=0;i<hits;i++){if(e.hp<=0)break;
+  const crit=sk.forcrit?true:Math.random()*100<critChance()+cb;
+  let d=applyEnemyMods(Math.round(base*(crit?(c.critd+critdB)/100:1)),sk);
+  const eb=elemBonus(d);
+  e.hp-=d+eb;dealt+=d+eb;onPlayerDealtDmg(e,d+eb);
+  feed('⚔ '+h.name+' '+sk.txt+(hits>1?' ('+(i+1)+'/'+hits+')':'')+': <b>'+fmt(d)+'</b>'+(eb?' <span style="color:#9fd0c8">+'+fmt(eb)+' стихии</span>':'')+(crit?' <span class="c">КРИТ!</span>':''),crit?'c':'p');
+  floatDmg('eface','-'+fmt(d+eb),crit?'crit':'');shake($('ecard'));
+  const fx=weaponProcs(base,e);if(fx.length&&i===0)feed('💎 '+fx.join(', '),'s');
+  if(crit&&sp('wolf')){const wh=Math.round(c.maxhp*0.05);h.hp=Math.min(c.maxhp,h.hp+wh);floatDmg('pface','+'+fmt(wh),'heal');}}
+ let dotSrc=null;if(mast&&sk.m&&sk.m.dot)dotSrc=sk.m.dot;else if(sk.dot)dotSrc=sk.dot;
+ if(dotSrc&&e.hp>0){e.dot=dotSrc.t;e.dotD=Math.max(1,Math.round(base*dotSrc.pct/100));e.dotEl=sk.mag?'fire':'poison';feed('☠ Эффект терзает врага…','s');}
+ if(sp('tear')&&e.hp>0&&!dotSrc){e.dot=Math.max(e.dot,3);e.dotD=Math.max(e.dotD,Math.max(1,Math.round(base*0.08)));e.dotEl='poison';}
+ if(sp('vulcan')&&e.hp>0&&!dotSrc){e.dot=Math.max(e.dot,3);e.dotD=Math.max(e.dotD,Math.max(1,Math.round(base*0.1)));e.dotEl='fire';}
+ if(sk.stun&&e.hp>0){e.stun=Math.max(e.stun,(sk.stun||0)+((mast&&sk.m&&sk.m.stun)?sk.m.stun:0));feed('❄ Враг оглушён!','s');}
+ if(sk.debuff&&e.hp>0){e.debuff={pct:(mast&&sk.m&&sk.m.debuff)?sk.m.debuff:sk.debuff.pct,t:sk.debuff.t};
+  feed('💀 Метка смерти: враг получает +'+e.debuff.pct+'% урона','s');}
+ let healPct=0;if(sk.heal)healPct=(mast&&sk.m&&sk.m.heal)?sk.m.heal:sk.heal;
+ if(mast&&sk.m&&sk.m.leech)healPct+=sk.m.leech;
+ if(c.leech>0)healPct+=c.leech;
+ if(healPct>0&&dealt>0){const am=Math.round(dealt*healPct/100);h.hp=Math.min(c.maxhp,h.hp+am);floatDmg('pface','+'+fmt(am),'heal');}
+ if(sk.after)sk.after.forEach(b=>COM.pbuffs.push({k:b.k,pct:Math.round(b.pct*rMul),t:b.t}));
+ if(e.hp<=0)return onWin();
+ renderTop();}
+function attackOnce(second){if(!COM)return;const e=COM.e;
+ if(Math.random()*100<dodgeChance()){feed('🌀 '+e.n+' атакует'+(second?' повторно':'')+' — ты уходишь в сторону!','s');return;}
+ const d=enemyStrike(1);S.hero.hp-=d;
+ feed('🩸 '+e.n+' атакует'+(second?' повторно':'')+': <b>'+fmt(d)+'</b> урона'+(e.elem?' <span style="color:'+ELEMS[e.elem].c+'">'+ELEMS[e.elem].icon+' '+ELEMS[e.elem].n.toLowerCase()+'</span>':''),'e');
+ floatDmg('pface','-'+fmt(d),'');shake($('pcard'));
+ if(e.trait&&(e.trait.k==='venom'||e.trait.k==='burn')){
+  const el=e.trait.k==='burn'?'fire':'poison';
+  COM.pdot={k:el,d:Math.max(1,Math.round(e.dmg*(el==='fire'?0.15:0.12)*(1-elemRes(el)))),t:3};
+  feed((el==='fire'?'🔥 Ожог':'☠ Яд')+' проникает в кровь!','e');}
+ if(!second&&e.trait&&e.trait.k==='swift'&&Math.random()<0.25){feed('⚡ Враг движется быстрее глаза!','e');attackOnce(true);}}
+function enemyAct(){if(!COM||COM.over)return;const e=COM.e;
+ if(!e.enr&&e.boss&&e.hp<e.maxhp*0.3){e.enr=true;e.buffs.push({k:'dmg',pct:40,t:999});feed('💢 '+e.n+' впадает в ярость!','e');}
+ e.atkN++;
+ const useSp=e.sp&&e.atkN%3===0;
+ if(useSp){feed('💥 '+e.n+' применяет «'+e.sp.n+'»!','e');
+  if(e.sp.txt)feed('<i>'+e.sp.txt+'</i>','s');
+  const d=enemyStrike(e.sp.m||1.6);S.hero.hp-=d;
+  feed('Ты получаешь <b>'+fmt(d)+'</b> урона!'+(e.elem?' <span style="color:'+ELEMS[e.elem].c+'">'+ELEMS[e.elem].icon+'</span>':''),'e');
+  floatDmg('pface','-'+fmt(d),'crit');shake($('main'));
+  if(e.sp.heal){const am=Math.round(e.maxhp*e.sp.heal/100);e.hp=Math.min(e.maxhp,e.hp+am);feed(e.n+' восстанавливает '+fmt(am)+' ОЗ','e');}
+  if(e.sp.buff)e.buffs.push(Object.assign({},e.sp.buff));}
+ else attackOnce(false);
+ if(S.hero.hp<=0)return onLose();}
+function combatTick(){if(!COM||COM.over)return;const dt=250;const e=COM.e,h=S.hero,c=S.cs;
+ COM.t+=dt;COM.gcd=Math.max(0,COM.gcd-dt);COM.potCd=Math.max(0,COM.potCd-dt);
+ Object.keys(COM.cd).forEach(k=>COM.cd[k]=Math.max(0,COM.cd[k]-dt));
+ COM.sec+=dt;
+ if(COM.sec>=1000){COM.sec-=1000;
+  if(e.dot>0&&e.hp>0){e.hp-=e.dotD;feed('☠ Эффект терзает '+e.n+': <b>'+fmt(e.dotD)+'</b>','s');e.dot--;
+   if(e.hp<=0)return onWin();}
+  if(COM.pdot){h.hp-=COM.pdot.d;feed((COM.pdot.k==='fire'?'🔥 Ожоги':'☠ Яд')+' терзают тебя: <b>'+fmt(COM.pdot.d)+'</b>','e');
+   floatDmg('pface','-'+fmt(COM.pdot.d),'');COM.pdot.t--;if(COM.pdot.t<=0)COM.pdot=null;
+   if(h.hp<=0)return onLose();}
+  if(e.trait&&e.trait.k==='regen'&&e.hp>0){const am=Math.max(1,Math.round(e.maxhp*0.03));e.hp=Math.min(e.maxhp,e.hp+am);feed('💚 '+e.n+' восстанавливает '+fmt(am)+' ОЗ','s');}
+  if(sp('crown')){const am=Math.round(c.maxhp*0.02);h.hp=Math.min(c.maxhp,h.hp+am);}
+  COM.pbuffs.forEach(b=>{if(b.k==='regen'){const am=Math.round(c.maxhp*b.pct/100);h.hp=Math.min(c.maxhp,h.hp+am);}});
+  COM.pbuffs=COM.pbuffs.filter(b=>--b.t>0);
+  e.buffs=e.buffs.filter(b=>--b.t>0);
+  if(e.debuff&&--e.debuff.t<=0)e.debuff=null;}
+ COM.pAtk+=dt;
+ if(COM.pAtk>=pInterval()){COM.pAtk=0;if(!COM.over)autoAttack();if(!COM)return;}
+ if(e.stun>0){e.stun-=dt/1000;}
+ else{COM.eAtk+=dt;
+  const eInt=2600*(e.slow?1.15:1);
+  if(COM.eAtk>=eInt){COM.eAtk=0;enemyAct();if(!COM)return;}}
+ renderCombatLive();}
+function renderCombatLive(){if(!COM||S.page!=='combat')return;if(!$('ehp'))return;
+ $('ehp').style.width=Math.max(0,COM.e.hp/COM.e.maxhp*100)+'%';$('ehpt').textContent=fmt(Math.max(0,COM.e.hp))+' / '+fmt(COM.e.maxhp);
+ $('php').style.width=Math.max(0,S.hero.hp/S.cs.maxhp*100)+'%';$('phpt').textContent=fmt(Math.max(0,S.hero.hp))+' / '+fmt(S.cs.maxhp);
+ if($('pmpi'))$('pmpi').style.width=Math.max(0,S.hero.mp/S.cs.maxmp*100)+'%';
+ if($('pmpt'))$('pmpt').textContent=fmt(S.hero.mp)+' маны';
+ if($('pstat'))$('pstat').innerHTML=COM.pdot?(COM.pdot.k==='fire'?'🔥 горит':'☠ отравлен'):'';
+ if($('patk'))$('patk').style.width=Math.min(100,COM.pAtk/pInterval()*100)+'%';
+ if($('eatk'))$('eatk').style.width=Math.min(100,COM.eAtk/(2600*(COM.e.slow?1.15:1))*100)+'%';
+ CLASSES[S.hero.cls].skills.forEach(key=>{const b=$('skb_'+key);if(!b)return;
+  const cd=COM.cd[key]||0;
+  b.disabled=S.hero.mp<SKILLDB[key].mp||cd>0||COM.gcd>0||COM.over;
+  const s=b.querySelector('small');
+  if(s)s.textContent=cd>0?'перезарядка '+(cd/1000).toFixed(1)+' с':'ранг '+skillRankByKey(key)+' · '+SKILLDB[key].mp+' маны';});
+ const ph=$('potH'),pm=$('potM');
+ if(ph)ph.disabled=!S.hero.pots.hp||COM.potCd>0;
+ if(pm)pm.disabled=!S.hero.pots.mp||COM.potCd>0;
+ ['rage','stone','swift'].forEach(k=>{const b=$('elx_'+k);if(!b)return;
+  b.disabled=!(S.hero.elix[k]>0)||COM.potCd>0;
+  const s=b.querySelector('small');if(s)s.textContent='×'+S.hero.elix[k];});
+ renderTop();}
+function useElixir(k){if(!COM)return;const h=S.hero;
+ if(!(h.elix[k]>0)||COM.potCd>0)return;
+ h.elix[k]--;COM.potCd=2000;
+ if(k==='rage')COM.pbuffs.push({k:'dmg',pct:25,t:10});
+ if(k==='stone')COM.pbuffs.push({k:'armor',pct:40,t:10});
+ if(k==='swift')COM.pbuffs.push({k:'swiftB',pct:35,t:10});
+ feed('⚗ '+ELIXN[k].n+' выпит! ('+ELIXN[k].d+')','c');renderCombatLive();}
+function tryFlee(){if(!COM||COM.over)return;
+ const ch=60+(sp('whisper')?15:0);
+ if(!COM.ctx.boss&&Math.random()*100<ch){feed('💨 Тебе удаётся скрыться!','s');log('Ты сбегаешь из боя.','sys');
+  stopCombat();const wasRun=COM.ctx.type==='run';COM=null;
+  if(wasRun)endRun('Ты покидаешь подземелье, унося ноги.');else show('map');return;}
+ feed('Побег не удался!','e');}
+function drinkPot(k){const h=S.hero,c=S.cs;if(!h.pots[k]){toast('Зелий нет');return;}
+ if(COM&&COM.potCd>0)return;
+ if(k==='hp'&&h.hp>=c.maxhp){toast('Здоровье полное');return;}
+ if(k==='mp'&&h.mp>=c.maxmp){toast('Мана полная');return;}
+ h.pots[k]--;
+ if(k==='hp'){const am=Math.round(c.maxhp*0.4);h.hp=Math.min(c.maxhp,h.hp+am);
+  if(COM){COM.potCd=2000;feed('🧪 Зелье лечения: +'+fmt(am)+' ОЗ','c');floatDmg('pface','+'+fmt(am),'heal');}
+  else log('🧪 Зелье лечения: +'+fmt(am)+' ОЗ','good');}
+ else{h.mp=Math.min(c.maxmp,h.mp+Math.round(c.maxmp*0.5));
+  if(COM){COM.potCd=2000;feed('🧪 Зелье маны: +50% маны','c');}else log('🧪 Зелье маны','good');}
+ if(COM)renderCombatLive();else show('hub');renderTop();}
+function dropGem(src){const gk=P(Object.keys(GEMS));S.hero.gems[gk]=(S.hero.gems[gk]||0)+1;
+ log('💎 Самоцвет ('+src+'): '+GEMS[gk].n,'loot');}
+function onWin(){if(!COM)return;stopCombat();COM.over=true;const e=COM.e,c=S.cs,ctx=COM.ctx;
+ const zi=ctx.zi,zl=ZONES[zi].lv;
+ const g=gainGold(Math.round(e.gold*R(0.8,1.3)));
+ log('☠ <b>'+e.n+'</b> повержен! Добыча: <b>'+fmt(g)+'</b> 🪙','good');
+ trackKill(zi);
+ // вещь
+ const gearCh=e.boss?100:e.elite?55:35+c.mf*0.3;
+ if(Math.random()*100<gearCh)addItem(genItem(zl+2,c.mf,e.boss?RI(3,4):e.elite?RI(1,3):undefined));
+ // предмет набора зоны
+ const setCh=e.boss?60:e.elite?20:8;
+ if(Math.random()*100<setCh+c.mf*0.2)addItem(makeZoneItem(zi));
+ // осколки
+ if(e.boss){const fr=RI(8,16);S.frag+=fr;log('◆ Осколки силы: +'+fr,'loot');}
+ else if(e.elite){if(Math.random()<0.7){const fr=RI(2,3);S.frag+=fr;log('◆ Осколки: +'+fr,'loot');}}
+ else if(Math.random()<0.3){const fr=RI(1,2);S.frag+=fr;log('◆ Осколки: +'+fr,'loot');}
+ // трофеи
+ const tNum=e.boss?3:e.elite?2:(Math.random()<0.5?1:0);
+ if(tNum>0){const ti=RI(0,1);const key=zi+'_'+ti;S.hero.troph[key]=(S.hero.troph[key]||0)+tNum;
+  log('🎭 Трофей: '+TROPH[zi][ti].nm+' ×'+tNum,'loot');}
+ // самоцвет
+ const gemCh=e.boss?60:e.elite?12:3;
+ if(Math.random()*100<gemCh)dropGem('добыча');
+ if(e.boss){trackBoss(zi);
+  const bk=zi+'_b';S.hero.troph[bk]=(S.hero.troph[bk]||0)+1;
+  log('🎭 Трофей босса: <b>'+BOSS_TROPH[zi].nm+'</b>','loot');
+  if(Math.random()<0.45){const u=UNIQUES.find(x=>x.nm===SIG[zi])||P(UNIQUES);addItem(makeUnique(u));}
+  if(!S.hero.bosses[zi]){S.hero.bosses[zi]=1;log('🏆 <b>'+e.n+'</b> пал впервые. Грейхолд будет помнить это имя.','story');
+   if(zi===4)toast('👑 ЦИТАДЕЛЬ ПАЛА. Пепел больше не падает с небес. Ты — легенда.');}}
+ else if(e.elite&&Math.random()<0.04)addItem(makeUnique(P(UNIQUES)));
+ S.hero.kills++;gainXP(e.xp);
+ COM=null;save();
+ if(e.boss&&ctx.type==='run'){S.hero.dungeons=(S.hero.dungeons||0)+1;trackDungeon(zi);RUN=null;toast('🏆 Данж пройден!');log('🕳 Подземелье зачищено. Бард уже сочиняет песню.','good');show('map');return;}
+ if(e.boss){RUN=null;toast('🏆 Босс повержен!');show('map');return;}
+ if(ctx.type==='run'){RUN.pending=true;show('run');}
+ else show('map');}
+function onLose(){if(!COM)return;stopCombat();COM.over=true;COM=null;RUN=null;const lost=Math.round(S.gold*0.15);S.gold-=lost;
+ calcStats();S.hero.hp=S.cs.maxhp;S.hero.mp=S.cs.maxmp;S.buff=null;
+ log('💀 Тьма поглощает тебя… Ты приходишь в себя в Грейхолде. Потеряно <b>'+fmt(lost)+'</b> 🪙.','bad');
+ toast('💀 Ты пал… но Грейхолд принял тебя обратно');save();show('hub');}
+
+/* ================= ХАБ ================= */
+function rest(){const c=S.cs;S.hero.hp=c.maxhp;S.hero.mp=c.maxmp;
+ log(P(['Ты спишь на жёсткой койке под гул ветра в бойницах.','Горячий бульон, кружка тёмного эля — и раны затягиваются.','Старый солдат у очага рассказывает о Цитадели. Ты слушаешь и молчишь.'])+' <b>ОЗ и мана восстановлены.</b>','good');
+ renderTop();save();}
+function bless(i){const cost=40+S.hero.lvl*8;if(S.gold<cost){toast('Недостаточно золота');return;}
+ const opts=[{n:'Благословение Пламени',mods:{dmg:12},d:'+12% урона'},{n:'Благословение Камня',mods:{armor:20},d:'+20% брони'},
+  {n:'Благословение Ветра',mods:{crit:5},d:'+5% крит.'},{n:'Благословение Мудреца',mods:{xp:20},d:'+20% опыта'}];
+ S.gold-=cost;S.buff={name:opts[i].n,mods:opts[i].mods,d:opts[i].d};S.cs=null;calcStats();
+ log('🕯 Алтарь одаряет тебя: <b>'+S.buff.name+'</b> ('+S.buff.d+')','good');save();renderAll();}
+function useOrb(){const i=S.hero.inv.findIndex(x=>x.orb);if(i<0){toast('Нет Орба Забвения');return;}
+ S.hero.inv.splice(i,1);const spent=spentPts();
+ S.hero.pts+=spent;S.hero.talloc={origin:true,r_0_1:true};S.cs=null;
+ log('🌀 Орб Забвения вспыхивает. Очки навыков возвращены: '+spent,'sys');save();renderAll();}
+
+/* ================= КУЗНИЦА ================= */
+function enhChance(it){const n=(it.enh||0)+1;let c=95-9*n;if(S.hero.race==='dwarf')c+=15;return Math.max(5,Math.min(95,c));}
+function enhCost(it){const n=(it.enh||0)+1;return{gold:20+n*30+it.lvl*5*n,frag:1+n};}
+function doEnhance(id){const f=findItem(id);if(!f)return;const it=f.it;const n=(it.enh||0)+1;
+ if(n>15){toast('Предел заточки: +15');return;}
+ const cost=enhCost(it);if(S.gold<cost.gold||S.frag<cost.frag){toast('Не хватает ресурсов');return;}
+ S.gold-=cost.gold;S.frag-=cost.frag;
+ if(Math.random()*100<enhChance(it)){it.enh=n;S.cs=null;trackEnh();
+  toast('⚒ Заточка успешна: '+it.nm+' +'+n+'!');log('⚒ <b>'+it.nm+'</b> заточен до <b>+'+n+'</b>','good');}
+ else{if(S.hero.prot>0){S.hero.prot--;it.enh=Math.max(0,it.enh-1);
+   toast('🛡 Камень-оберег поглотил провал!');log('Заточка сорвалась — Камень-оберег раскололся, спасая <b>'+it.nm+'</b>. Уровень: +'+it.enh,'bad');}
+  else{if(f.from==='inv')S.hero.inv.splice(f.i,1);else{S.hero.eq[f.s]=null;}S.cs=null;
+   toast('💥 ПРЕДМЕТ УНИЧТОЖЕН');log('💥 Сталь не выдержала. <b>'+it.nm+'</b> рассыпался пеплом в твоих руках.','bad');}}
+ save();renderAll();}
+
+/* ================= РЕНДЕР ================= */
+function renderTop(){if(!S||!S.hero)return;const c=S.cs||calcStats(),h=S.hero;
+ $('t-name').textContent=h.name;$('t-race').textContent=RACES[h.race].name+' · '+CLASSES[h.cls].name;
+ $('t-lvl').textContent='ур. '+h.lvl;
+ $('b-hp').style.width=(Math.max(0,h.hp)/c.maxhp*100)+'%';$('t-hp').textContent='ОЗ '+fmt(Math.max(0,h.hp))+' / '+fmt(c.maxhp);
+ $('b-mp').style.width=(Math.max(0,h.mp)/c.maxmp*100)+'%';$('t-mp').textContent='Мана '+fmt(Math.max(0,h.mp))+' / '+fmt(c.maxmp);
+ $('b-xp').style.width=(h.xp/xpNeed(h.lvl)*100)+'%';$('t-xp').textContent='опыт '+fmt(h.xp)+' / '+fmt(xpNeed(h.lvl));
+ $('t-gold').textContent=fmt(S.gold)+' 🪙';$('t-frag').textContent=fmt(S.frag)+' ◆';}
+function renderLog(){if(!S)return;$('logbox').innerHTML=S.log.map(e=>'<div class="le '+e.cls+'">'+e.h+'</div>').join('');}
+const NAV=[['hub','🏰','Грейхолд'],['map','🗺️','Земли'],['run','🕳️','Данж',1],['hero','👤','Герой'],['tree','🌳','Умения'],['inv','🎒','Инвентарь'],['forge','⚒️','Кузница'],['alch','⚗️','Алхимик'],['shop','⚖️','Рынок']];
+function renderNav(){if(!S)return;$('nav').innerHTML=NAV.map(([p,i,n,cond])=>{
+ if(cond&&!RUN)return'';
+ let bdg='';
+ if(p==='tree'&&S.hero.pts>0)bdg='<span class="bdg">'+S.hero.pts+'</span>';
+ else if(p==='hero'&&S.hero.sp>0)bdg='<span class="bdg">'+S.hero.sp+'</span>';
+ else if(p==='hub'&&S.board&&S.board.orders.some(o=>o.prog>=o.n))bdg='<span class="bdg">!</span>';
+ return '<button class="navbtn '+(S.page===p?'on':'')+'" onclick="show(\''+p+'\')"><i>'+i+'</i>'+n+bdg+'</button>';}).join('')
+ +'<div class="nav-sep"></div><div style="padding:8px 12px;color:var(--dim2);font-size:11px;line-height:1.7">'
+ +'☠ Убийств: '+S.hero.kills+'<br>🏆 Боссов: '+Object.keys(S.hero.bosses).length+'/5<br>🕳️ Данжей: '+(S.hero.dungeons||0)
+ +'<br><span style="cursor:pointer;text-decoration:underline" onclick="if(confirm(\'Начать заново? Прогресс будет стёрт.\')){localStorage.removeItem(\'AS2\');location.reload();}">новая игра</span></div>';}
+function show(p){stopCombat();S.page=p;COM=null;render();save();}
+function render(){if(!S)return;renderTop();renderNav();
+ const fns={hub:renderHub,map:renderMap,run:renderRun,hero:renderHero,tree:renderTree,inv:renderInv,forge:renderForge,alch:renderAlch,shop:renderShop,combat:renderCombat};
+ (fns[S.page]||renderHub)();}
+function renderAll(){try{renderTop();renderNav();renderLog();render();}catch(e){showErr('render: '+e.message);}}
+function renderHub(){const m=$('main');
+ const buffTxt=S.buff?' На тебе лежит <b style="color:var(--gold)">'+S.buff.name+'</b> ('+S.buff.d+') — до первой смерти.':'';
+ let html='<h2 class="pt">Грейхолд</h2><div class="sub">последний город выжженных земель</div>';
+ html+='<div class="panel"><p style="line-height:1.7;font-size:15px">Грейхолд стоит на перекрёстке трёх дорог, и все три ведут во мрак. Здесь пахнет дымом, свежей сталью и варевом из старой репы.'+buffTxt+'</p></div>';
+ html+='<div class="cols3">'
+ +'<div class="card" style="cursor:pointer" onclick="rest()"><div style="font-size:30px">🛏️</div><h3 style="font-family:var(--fd);font-size:20px">Таверна «Три угля»</h3><p style="color:var(--dim);font-size:13px;margin-top:4px">Отдохнуть: полное восстановление ОЗ и маны. Бесплатно.</p></div>'
+ +'<div class="card"><div style="font-size:30px">🕯️</div><h3 style="font-family:var(--fd);font-size:20px">Алтарь</h3><p style="color:var(--dim);font-size:13px;margin-top:4px">Благословение до первой смерти. Цена: '+(40+S.hero.lvl*8)+' 🪙</p>'
+ +'<div style="display:flex;flex-direction:column;gap:5px;margin-top:8px">'
+ +['🔥 Пламя +12% урона','🪨 Камень +20% брони','🌪 Ветер +5% крит','📖 Мудрец +20% опыта'].map((t,i)=>'<button class="btn small" onclick="bless('+i+')">'+t+'</button>').join('')+'</div></div>'
+ +'<div class="card"><div style="font-size:30px">🧳</div><h3 style="font-family:var(--fd);font-size:20px">Припасы</h3>'
+ +'<div style="font-size:13.5px;color:var(--dim);margin:6px 0">🧪 Зелья лечения: <b style="color:var(--txt)">'+S.hero.pots.hp+'</b> · маны: <b style="color:var(--txt)">'+S.hero.pots.mp+'</b><br>🛡 Оберегов: <b style="color:var(--txt)">'+S.hero.prot+'</b> · эликсиры: 🔥'+S.hero.elix.rage+' 🪨'+S.hero.elix.stone+' 🦅'+S.hero.elix.swift+'</div>'
+ +'<button class="btn small" onclick="drinkPot(\'hp\')">Выпить зелье ОЗ</button></div></div>';
+ html+='<div class="panel"><h2 class="pt" style="font-size:22px">📜 Доска заказов</h2><div class="sub">город платит тем, кто делает грязную работу</div>';
+ S.board.orders.forEach((o,i)=>{const inf=orderInfo(o);const done=o.prog>=o.n;
+  html+='<div class="order '+(done?'done':'')+'"><div class="oi">'+inf.ic+'</div>'
+  +'<div style="flex:1"><h4>'+inf.t+'</h4><p>'+inf.d+'</p>'
+  +'<div class="rw">Награда: '+fmt(o.gold)+' 🪙 · '+fmt(o.xp)+' оп. · '+o.frag+' ◆'+(o.item?' · предмет':'')+'</div>'
+  +'<div class="bar ord" style="height:8px;margin-top:5px;max-width:220px"><i style="width:'+Math.min(100,o.prog/o.n*100)+'%"></i></div></div>'
+  +'<div style="text-align:center;min-width:90px"><div style="font-weight:700;color:'+(done?'#8fe08f':'var(--dim)')+';margin-bottom:6px">'+o.prog+'/'+o.n+'</div>'
+  +'<button class="btn small '+(done?'gold':'')+'" '+(done?'':'disabled')+' onclick="claimOrder('+i+')">Сдать</button></div></div>';});
+ html+='<button class="btn small" onclick="rerollBoard()">🔄 Обновить доску (30 🪙)</button></div>';
+ html+='<div class="cols" style="margin-top:2px">'
+ +'<div class="card" style="cursor:pointer" onclick="show(\'map\')"><div style="font-size:30px">🗺️</div><h3 style="font-family:var(--fd);font-size:20px">Врата города</h3><p style="color:var(--dim);font-size:13px">Пять земель ждут. Охота, данжи, боссы.</p></div>'
+ +'<div class="card" style="cursor:pointer" onclick="show(\'tree\')"><div style="font-size:30px">🌳</div><h3 style="font-family:var(--fd);font-size:20px">Древо умений</h3><p style="color:var(--dim);font-size:13px">Очки навыков: <b style="color:var(--gold)">'+S.hero.pts+'</b> · Очки характеристик: <b style="color:var(--gold)">'+S.hero.sp+'</b></p></div></div>';
+ m.innerHTML=html;}
+function renderMap(){const m=$('main');const page=S.ui.mapPage||0;const names=['Внешние земли','Средние земли','Земли тьмы'];
+ const unlocked=i=>i===0||S.hero.bosses[i-1]>0;
+ let html='<h2 class="pt">Земли</h2><div class="sub">выбери, куда понесёт тебя судьба</div>';
+ html+='<div style="display:flex;gap:8px;margin-bottom:16px">'+[0,1,2].map(i=>'<button class="btn '+(page===i?'gold':'')+'" onclick="S.ui.mapPage='+i+';renderMap()">'+names[i]+'</button>').join('')+'</div>';
+ ZONES.forEach((z,i)=>{if(PAGEOF(i)!==page)return;const un=unlocked(i);
+  const elem=ZONE_ELEM[i]?' · бьёт стихией: '+ELEMS[ZONE_ELEM[i]].icon+' '+ELEMS[ZONE_ELEM[i]].n:'';
+  html+='<div class="panel zonecard '+(un?'':'locked')+'"><div style="display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap">'
+  +'<div style="flex:1;min-width:260px"><span class="lv">'+z.icon+' ЗОНА '+(i+1)+' · ур. '+z.lv+'+</span><h3>'+z.nm+'</h3><p>'+z.ds+'</p>'
+  +'<div class="boss-tag">☠ Хранитель: '+z.boss.n+elem+(S.hero.bosses[i]?' <span style="color:#7fb95c">— повержен</span>':'')+'</div>'
+  +'<div class="lootinfo">Шансы лута — моб: вещь 35% · набор «'+z.nm+'» 8% · трофей 50% · осколки 30% · самоцвет 3%<br>'
+  +'элитка: вещь 55% · набор 20% · самоцвет 12% · уникальный 4%<br>'
+  +'босс: вещь 100% (р3–4) · сигнатура 45% · набор 60% · осколки 8–16 · самоцвет 60% · трофей босса 100%<br>'
+  +'сундук в данже: вещь 100% (р2–3) · набор 25% · самоцвет 35% · осколки 50%<br>'
+  +'Набор зоны: '+ZONE_SET[i].map(s=>'<span class="c3">'+s.nm+'</span>').join(' · ')+'</div></div>'
+  +'<div style="display:flex;flex-direction:column;gap:8px;justify-content:center;min-width:180px">'
+  +(un?'<button class="btn" onclick="hunt('+i+')">⚔ Охотиться</button>'
+    +'<button class="btn gold" onclick="startDungeon('+i+')">🕳️ Данж ('+(6+i)+' комнат)</button>'
+    +'<button class="btn danger" onclick="fightBoss('+i+')" '+(S.hero.lvl>=z.lv?'':'disabled')+'>☠ Вызвать босса</button>'
+   :'<button class="btn" disabled>Путь закрыт</button><div style="font-size:11.5px;color:var(--dim)">Победи хранителя: '+ZONES[i-1].boss.n+'</div>')
+  +'</div></div></div>';});
+ m.innerHTML=html;}
+function hunt(zi){S.cs=calcStats();startCombat(makeEnemy(zi,Math.random()<0.15),{type:'hunt',zi:zi});}
+function fightBoss(zi){S.cs=calcStats();RUN=null;startCombat(makeBoss(zi),{type:'boss',zi:zi});}
+function startDungeon(zi){S.cs=calcStats();RUN={zi:zi,room:0,rooms:6+zi,pending:false};log('🕳️ Ты спускаешься во мрак: <b>'+ZONES[zi].nm+'</b>. Комнат впереди: '+RUN.rooms+'.','story');S.page='run';render();save();enterRoom();}
+function endRun(msg){RUN=null;if(msg)log(msg,'sys');save();show('map');}
+function enterRoom(){if(!RUN)return;RUN.room++;RUN.pending=false;
+ if(RUN.room>=RUN.rooms){log('⛩ Последняя дверь. За ней ждёт <b>'+ZONES[RUN.zi].boss.n+'</b>.','story');
+  S.cs=calcStats();startCombat(makeBoss(RUN.zi),{type:'run',zi:RUN.zi});return;}
+ const r=Math.random()*100;
+ if(r<52){S.cs=calcStats();startCombat(makeEnemy(RUN.zi,Math.random()<0.2),{type:'run',zi:RUN.zi});return;}
+ if(r<64){log('🗝 Ты вскрываешь окованный сундук.','loot');
+  addItem(genItem(ZONES[RUN.zi].lv+2,S.cs.mf+10,RI(2,3)));
+  if(Math.random()<0.25)addItem(makeZoneItem(RUN.zi));
+  if(Math.random()<0.35)dropGem('сундук');
+  if(Math.random()<0.5){const fr=RI(1,3);S.frag+=fr;log('◆ Осколки: +'+fr,'loot');}}
+ else if(r<76){const t=P(TRAPS);log('⚠ '+t.t,'bad');if(t.hp)S.hero.hp=Math.max(1,S.hero.hp-Math.round(S.cs.maxhp*t.hp/100));else S.hero.mp=Math.max(0,S.hero.mp-Math.round(S.cs.maxmp*t.mp/100));renderTop();}
+ else if(r<86){const fr=RI(1,3);S.frag+=fr;log('✦ Алтарь древних. Осколки силы: +'+fr,'loot');}
+ else log('📜 '+P(STORIES),'story');
+ save();renderRun();}
+function renderRun(){const m=$('main');if(!RUN){show('map');return;}
+ const z=ZONES[RUN.zi];
+ let pips='';for(let i=0;i<RUN.rooms;i++)pips+='<div class="pip '+(i<RUN.room?'done':'')+(i===RUN.room-1?' cur':'')+'"></div>';
+ m.innerHTML='<h2 class="pt">🕳️ '+z.nm+' — данж</h2><div class="sub">комната '+RUN.room+' из '+RUN.rooms+'</div>'
+ +'<div class="panel"><div class="pips">'+pips+'</div>'
+ +'<p style="color:var(--dim);font-style:italic;line-height:1.6">'+(RUN.room===0?'Ступени уходят вниз, во тьму.':RUN.pending?'Путь дальше свободен. Пока что.':'Ты продвигаешься вглубь.')+'</p>'
+ +'<div style="display:flex;gap:10px;margin-top:14px">'
+ +'<button class="btn gold big" onclick="enterRoom()">Идти дальше ➤</button>'
+ +'<button class="btn" onclick="drinkPot(\'hp\')">🧪 Зелье ('+S.hero.pots.hp+')</button>'
+ +'<button class="btn danger" onclick="endRun(\'Ты покидаешь подземелье.\')">Отступить</button></div></div>';}
+function renderHero(){const m=$('main');const c=S.cs,h=S.hero;
+ let html='<h2 class="pt">'+h.name+'</h2><div class="sub">'+RACES[h.race].icon+' '+RACES[h.race].name+' · '+CLASSES[h.cls].icon+' '+CLASSES[h.cls].name+', уровень '+h.lvl+' · очков навыков: <b style="color:var(--gold)">'+h.pts+'</b> · очков характеристик: <b style="color:var(--gold)">'+h.sp+'</b></div>';
+ html+='<div class="cols"><div class="panel"><div style="font-weight:700;color:var(--gold);letter-spacing:.1em;margin-bottom:8px">ХАРАКТЕРИСТИКИ'+(h.sp>0?' — распредели очки!':'')+'</div>';
+ Object.keys(STATS).forEach(k=>{html+='<div class="statline"><span>'+STATS[k]+'<span class="hint">'+STATHINT[k]+'</span></span>'
+  +'<span style="display:flex;gap:8px;align-items:center"><b>'+c[k]+'</b>'
+  +(h.sp>0?'<button class="btn plus" onclick="addStat(\''+k+'\')">+</button>':'')+'</span></div>';});
+ html+='<div style="margin-top:10px"><button class="btn small danger" onclick="respecStats()">🌀 Сбросить очки ('+fmt(50+h.lvl*10)+' 🪙)</button></div></div>';
+ html+='<div class="panel"><div style="font-weight:700;color:var(--gold);letter-spacing:.1em;margin-bottom:8px">БОЕВЫЕ КАЧЕСТВА</div>'
+ +'<div class="statline"><span>Урон</span><b>'+fmt(c.dmgMin)+'–'+fmt(c.dmgMax)+'</b></div>'
+ +'<div class="statline"><span>Сила чар</span><b>'+fmt(c.spellPow)+'</b></div>'
+ +'<div class="statline"><span>Броня</span><b>'+fmt(c.armor)+'</b></div>'
+ +'<div class="statline"><span>Крит. шанс</span><b>'+c.crit.toFixed(1)+'%</b></div>'
+ +'<div class="statline"><span>Крит. урон</span><b>'+c.critd.toFixed(0)+'%</b></div>'
+ +'<div class="statline"><span>Уклонение</span><b>'+c.evade.toFixed(1)+'%</b></div>'
+ +'<div class="statline"><span>Скорость атаки</span><b>'+(pInterval()/1000).toFixed(1)+' с</b></div>'
+ +'<div class="statline"><span>Кража жизни</span><b>'+c.leech+'%</b></div>'
+ +'<div class="statline"><span>Сопротивления</span><b>🔥'+c.res.fire+'% ☠'+c.res.poison+'% ❄'+c.res.ice+'% ⚡'+c.res.light+'% 🌑'+c.res.shadow+'%</b></div>'
+ +'<div class="statline"><span>Бонус опыта</span><b>+'+c.xpB+'%</b></div>'
+ +(S.buff?'<div class="statline"><span>Благословение</span><b>'+S.buff.d+'</b></div>':'')+'</div></div>';
+ html+='<div class="panel"><div style="font-weight:700;color:var(--gold);letter-spacing:.1em;margin-bottom:8px">УМЕНИЯ (изучаются в древе)</div>';
+ CLASSES[h.cls].skills.forEach((key,si)=>{const s=SKILLDB[key];const rk=skillRank(si);const mst=hasMastery(si);
+  html+='<div class="statline" style="'+(rk?'':'opacity:.45')+'"><span>'+s.n+' <span style="color:var(--mana)">('+s.mp+' маны)</span>'+(mst?'<span class="mast">МАСТЕРСТВО</span>':'')+'</span>'
+  +'<b style="font-weight:400;font-size:12.5px;max-width:400px;text-align:right">'+(rk?'ранг '+rk+'/5 · кд '+(cdFor(rk,mst)/1000).toFixed(1)+' с · '+skillEffTxt(key,rk):'не изучено')+'</b></div>';});
+ html+='</div>';
+ html+='<div class="panel"><div style="font-weight:700;color:var(--gold);letter-spacing:.1em;margin-bottom:8px">СНАРЯЖЕНИЕ</div>';
+ Object.keys(SLOTN).forEach(sl=>{const it=h.eq[sl];
+  html+='<div class="statline"><span>'+SLOTN[sl]+'</span><b style="font-weight:400">'+(it?'<span class="'+RC[it.rar]+'" style="cursor:pointer" onclick="itemMenu(\''+it.id+'\')">'+it.nm+(it.enh?' +'+it.enh:'')+'</span>':'<span style="color:var(--dim2)">— пусто —</span>')+'</b></div>';});
+ html+='</div>';
+ m.innerHTML=html;}
+function renderInv(){const m=$('main');const h=S.hero;
+ const list=[...h.inv].sort((a,b)=>(a.slot||'').localeCompare(b.slot||'')||b.rar-a.rar);
+ let html='<h2 class="pt">Инвентарь</h2><div class="sub">предметов: '+list.length+' · золото: '+fmt(S.gold)+' 🪙 · осколки: '+fmt(S.frag)+' ◆</div>';
+ html+='<div class="panel"><div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">'
+ +'<button class="btn" onclick="drinkPot(\'hp\')">🧪 Зелье лечения ('+h.pots.hp+')</button>'
+ +'<button class="btn" onclick="drinkPot(\'mp\')">🧪 Зелье маны ('+h.pots.mp+')</button>'
+ +'<button class="btn" onclick="useOrb()">🌀 Орб Забвения ('+h.inv.filter(x=>x.orb).length+')</button>'
+ +'<span style="color:var(--dim);font-size:13px">🛡 Обереги: <b>'+h.prot+'</b> · эликсиры: 🔥'+h.elix.rage+' 🪨'+h.elix.stone+' 🦅'+h.elix.swift+'</span></div></div>';
+ html+='<div class="panel"><div style="font-weight:700;color:var(--gold);letter-spacing:.1em;margin-bottom:8px">🎭 ТРОФЕИ</div>';
+ let troRows='';
+ for(let zi=0;zi<5;zi++){['0','1','b'].forEach(t=>{const key=zi+'_'+t;const n=h.troph[key]||0;if(!n)return;
+  const inf=troInfo(key);
+  troRows+='<div class="item" style="border-left-color:#8a7a5c"><div style="font-size:22px">'+inf.icon+'</div>'
+  +'<div style="flex:1"><div class="nm" style="color:#d8c8a8">'+inf.nm+'</div>'
+  +'<div class="ds">Трофей · '+ZONES[zi].nm+' · цена '+inf.price+' 🪙</div></div>'
+  +'<div style="display:flex;gap:6px;align-self:center;align-items:center"><b>×'+n+'</b>'
+  +'<button class="btn small" onclick="sellTroph(\''+key+'\',1)">Продать 1</button>'
+  +'<button class="btn small" onclick="sellTroph(\''+key+'\','+n+')">Все</button></div></div>';});}
+ html+=(troRows||'<div class="sub">Трофеев нет. Они падают с монстров и боссов.</div>')+'</div>';
+ html+='<div class="panel"><div style="font-weight:700;color:var(--gold);letter-spacing:.1em;margin-bottom:8px">💎 САМОЦВЕТЫ</div>';
+ const gemRows=Object.keys(GEMS).filter(k=>(h.gems[k]||0)>0).map(k=>'<div class="statline"><span>'+GEMS[k].icon+' '+GEMS[k].n+' <b>×'+h.gems[k]+'</b><span class="hint">Оружие: '+GEMS[k].w+' · Броня: '+GEMS[k].a+'</span></span></div>').join('');
+ html+=(gemRows||'<div class="sub">Самоцветов нет. Падают с боссов, элиток и из сундуков данжей.</div>')+'</div>';
+ html+='<div class="panel">'+(list.length?list.map(itemHtml).join(''):'<div class="sub">Пусто. Мрак ждёт, что ты это исправишь.</div>')+'</div>';
+ m.innerHTML=html;}
+function renderForge(){const m=$('main');
+ const list=[...Object.values(S.hero.eq).filter(Boolean),...S.hero.inv.filter(x=>!x.orb)];
+ let html='<h2 class="pt">Кузница Борга</h2><div class="sub">«Сталь не прощает дрожащих рук»</div>';
+ html+='<div class="panel"><p style="color:var(--dim);font-size:13.5px;line-height:1.6">Каждая ступень заточки даёт <b style="color:var(--gold)">+18% к базовому урону/броне</b>. '
+ +'Чем выше ступень — тем ниже шанс. <b style="color:var(--blood)">Провал уничтожает предмет.</b> Камень-оберег (у тебя: '+S.hero.prot+') спасает от разрушения, но уровень падает на 1. Дворфы получают +15% к шансу.</p></div>';
+ html+='<div class="panel">';
+ if(list.length){list.forEach(it=>{const n=(it.enh||0)+1;const ch=enhChance(it);const cost=enhCost(it);
+  html+='<div class="item r'+it.rar+'"><div style="font-size:22px">'+it.icon+'</div>'
+  +'<div style="flex:1"><div class="nm '+RC[it.rar]+'">'+it.nm+(it.enh?' +'+it.enh:'')+'</div>'
+  +'<div class="ds">До +'+n+': шанс <b style="color:'+(ch>=60?'#8fe08f':ch>=30?'var(--gold)':'var(--blood)')+'">'+ch+'%</b> · цена: '+fmt(cost.gold)+' 🪙 + '+cost.frag+' ◆</div></div>'
+  +'<button class="btn '+(ch<30?'danger':'')+'" style="align-self:center" onclick="doEnhance(\''+it.id+'\')" '+(n>15?'disabled':'')+'>'+(n>15?'Предел':'⚒ Точить')+'</button></div>';});}
+ else html+='<div class="sub">Нечего точить. Пока.</div>';
+ html+='</div>';
+ html+='<div class="panel"><h2 class="pt" style="font-size:22px">🔨 Мастерская</h2><div class="sub">выковывает редкие предметы из трофеев (уровень предмета — как у зоны)</div>';
+ ZONES.forEach((z,zi)=>{const cnt=troCount(zi);const un=zi===0||S.hero.bosses[zi-1];
+  html+='<div class="item" style="border-left-color:#8a7a5c;cursor:default"><div style="font-size:22px">'+z.icon+'</div>'
+  +'<div style="flex:1"><div class="nm" style="color:#d8c8a8">'+z.nm+'</div>'
+  +'<div class="ds">Трофеев зоны: <b>'+cnt+'</b> · оружие: 10 🎭+2◆+'+(50*(zi+1))+'🪙 · броня: 8 🎭+1◆+'+(40*(zi+1))+'🪙 · украшение: 6 🎭+1◆+'+(30*(zi+1))+'🪙</div></div>'
+  +'<div style="display:flex;gap:6px;align-self:center;flex-wrap:wrap;justify-content:flex-end">'
+  +'<button class="btn small" '+((un&&cnt>=10&&S.frag>=2&&S.gold>=50*(zi+1))?'':'disabled')+' onclick="craft('+zi+',\'weapon\')">⚔ Оружие</button>'
+  +'<button class="btn small" '+((un&&cnt>=8&&S.frag>=1&&S.gold>=40*(zi+1))?'':'disabled')+' onclick="craft('+zi+',\'armor\')">🛡 Броня</button>'
+  +'<button class="btn small" '+((un&&cnt>=6&&S.frag>=1&&S.gold>=30*(zi+1))?'':'disabled')+' onclick="craft('+zi+',\'trinket\')">📿 Украшение</button></div></div>';});
+ html+='</div>';
+ html+='<div class="panel"><div style="font-weight:700;color:var(--gold);letter-spacing:.1em;margin-bottom:8px">РАСКОЛОТЬ ТРОФЕИ (3 → 1 ◆)</div>';
+ let crush='';
+ for(let zi=0;zi<5;zi++){['0','1','b'].forEach(t=>{const key=zi+'_'+t;const n=S.hero.troph[key]||0;if(n<3)return;
+  const inf=t==='b'?BOSS_TROPH[zi]:TROPH[zi][+t];
+  crush+='<button class="btn small" onclick="crushTroph(\''+key+'\')">'+inf.icon+' '+inf.nm+' ×3 → ◆1</button> ';});}
+ html+=(crush||'<div class="sub">Нужно минимум 3 трофея одного вида.</div>')+'</div>';
+ m.innerHTML=html;}
+function renderAlch(){const m=$('main');
+ let html='<h2 class="pt">Алхимик Мира</h2><div class="sub">«Трофеи — не мусор. Это ингредиенты»</div>';
+ html+='<div class="panel"><div style="font-size:13.5px;color:var(--dim)">Реагенты: обычных трофеев <b style="color:var(--txt)">'+totalTroph()+'</b> · трофеев боссов <b style="color:var(--txt)">'+bTrophCount()+'</b> · осколков <b style="color:var(--txt)">'+S.frag+'</b></div></div>';
+ html+='<div class="panel">';
+ RECIPES.forEach(r=>{
+  const need=(r.tro?r.tro+' 🎭 ':'')+(r.btro?r.btro+' 👑 ':'')+(r.frag?r.frag+' ◆ ':'')+r.gold+' 🪙';
+  const ok=S.gold>=r.gold&&(!r.tro||totalTroph()>=r.tro)&&(!r.btro||bTrophCount()>=r.btro)&&(!r.frag||S.frag>=r.frag);
+  html+='<div class="item" style="border-left-color:#4fb3a5;cursor:default"><div style="font-size:22px">'+r.icon+'</div>'
+  +'<div style="flex:1"><div class="nm" style="color:#bfe0da">'+r.n+'</div><div class="ds">'+r.d+'</div>'
+  +'<div class="ds" style="color:var(--gold2)">Нужно: '+need+'</div></div>'
+  +'<button class="btn" style="align-self:center" '+(ok?'':'disabled')+' onclick="brew(\''+r.id+'\')">⚗ Сварить</button></div>';});
+ html+='</div>';
+ html+='<div class="panel"><div style="font-weight:700;color:var(--gold);letter-spacing:.1em;margin-bottom:8px">ВАШИ ЭЛИКСИРЫ (пьются в бою)</div>'
+ +'<div class="statline"><span>🔥 Эликсир Ярости</span><b>×'+S.hero.elix.rage+'</b></div>'
+ +'<div class="statline"><span>🪨 Эликсир Камня</span><b>×'+S.hero.elix.stone+'</b></div>'
+ +'<div class="statline"><span>🦅 Эликсир Сокола</span><b>×'+S.hero.elix.swift+'</b></div></div>';
+ m.innerHTML=html;}
+function renderShop(){const m=$('main');
+ const goods=[['hp','🧪 Зелье лечения',30,'Восстанавливает 40% ОЗ'],['mp','🧪 Зелье маны',25,'Восстанавливает 50% маны'],
+  ['frag','◆ Осколок силы',60,'Материал заточки'],['prot','🛡 Камень-оберег',220,'Спасает предмет при провале заточки'],
+  ['orb','🌀 Орб Забвения',450,'Возвращает все очки навыков']];
+ let html='<h2 class="pt">Рынок Грейхолда</h2><div class="sub">торговец клянётся, что «почти ничего не краденое»</div>';
+ html+='<div class="panel"><h2 class="pt" style="font-size:22px">🛡 Оружейная лавка Борга</h2><div class="sub">снаряжение под твой уровень · клик по предмету — купить</div>';
+ if(S.shopStock.length){S.shopStock.forEach((it,i)=>{const pr=stockPrice(it);
+  const req=S.hero.lvl<it.lvl?' <span style="color:var(--blood)">(нужен ур. '+it.lvl+')</span>':'';
+  const base=it.baseDmg?'⚔ Урон ~'+it.baseDmg:'🛡 Броня '+(it.armorFlat||0);
+  const af=Object.keys(it.mods).map(k=>modStr(k,it.mods[k])).join(' · ');
+  html+='<div class="item r'+it.rar+'" onclick="buyStock('+i+')">'
+  +'<div style="font-size:22px">'+it.icon+'</div>'
+  +'<div style="flex:1"><div class="nm '+RC[it.rar]+'">'+it.nm+req+'</div>'
+  +'<div class="ds">'+(it.unique?'УНИКАЛЬНЫЙ':RAR[it.rar])+' · ур. '+it.lvl+' · '+(SLOTN[it.slot]||'предмет')+' · '+base+' '+socketLine(it)+'</div>'
+  +(af?'<div class="af">✦ '+af+'</div>':'')+(it.spd?'<div class="spl">✧ '+it.spd+'</div>':'')+'</div>'
+  +'<div class="eq">🪙 '+fmt(pr)+'</div></div>';});}
+ else html+='<div class="sub">Всё раскуплено. Обнови ассортимент.</div>';
+ html+='<button class="btn small" onclick="refreshStock()">🔄 Обновить ассортимент (25 🪙)</button></div>';
+ html+='<div class="cols"><div class="panel"><div style="font-weight:700;color:var(--gold);letter-spacing:.1em;margin-bottom:10px">РАСХОДНИКИ</div>';
+ goods.forEach(([k,n,g,d])=>{html+='<div class="statline" style="align-items:center"><span>'+n+'<br><span style="font-size:11px;color:var(--dim)">'+d+'</span></span>'
+  +'<button class="btn small" onclick="buy(\''+k+'\')">'+g+' 🪙</button></div>';});
+ html+='</div><div class="panel"><div style="font-weight:700;color:var(--gold);letter-spacing:.1em;margin-bottom:10px">ПРОДАТЬ</div>';
+ const sellList=[...S.hero.inv].sort((a,b)=>b.rar-a.rar);
+ html+='<div style="max-height:420px;overflow-y:auto">'+(sellList.length?sellList.map(itemHtml).join(''):'<div class="sub">Тебе нечего продать.</div>')+'</div></div></div>';
+ m.innerHTML=html;}
+function buy(k){const prices={hp:30,mp:25,frag:60,prot:220,orb:450};const g=prices[k];
+ if(S.gold<g){toast('Недостаточно золота');return;}S.gold-=g;
+ if(k==='hp')S.hero.pots.hp++;else if(k==='mp')S.hero.pots.mp++;
+ else if(k==='frag')S.frag++;else if(k==='prot')S.hero.prot++;
+ else S.hero.inv.push({id:uid(),orb:true,nm:'Орб Забвения',icon:'🌀',rar:3,lvl:1,enh:0,mods:{},slot:'_',gems:[],sockets:0});
+ log('Куплено: '+(k==='hp'?'зелье лечения':k==='mp'?'зелье маны':k==='frag'?'осколок':k==='prot'?'Камень-оберег':'Орб Забвения'),'loot');save();renderAll();}
+
+/* ================= ДРЕВО РЕНДЕР ================= */
+function renderTree(){if(!CT)buildClassTree();const m=$('main');
+ m.innerHTML='<h2 class="pt">Древо умений — '+CLASSES[S.hero.cls].name+'</h2>'
+ +'<div class="sub">очков навыков: <b style="color:var(--gold);font-size:15px">'+S.hero.pts+'</b> · получай по 1 за уровень · ранг: +15% урона и −0.12 с перезарядки · колесо мыши — масштаб, перетаскивание — обзор</div>'
+ +'<div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">'
+ +'<button class="btn danger" onclick="refundTree()">🌀 Забыть всё ('+spentPts()*30+' 🪙)</button>'
+ +'<span style="align-self:center;font-size:12px;color:var(--dim)">ветка = умение: 5 рангов, затем ✦ мастерство</span></div>'
+ +'<div id="treewrap"><svg id="treesvg"></svg><div id="tt"></div></div>';
+ drawTree();}
+function drawTree(){if(!CT)buildClassTree();const svg=$('treesvg');if(!svg)return;const wrap=$('treewrap');const W=wrap.clientWidth,H=wrap.clientHeight;
+ const col=CLASSES[S.hero.cls].col,ta=talloc();
+ let out='<g id="tg" transform="translate('+VIEW.x+','+VIEW.y+') scale('+VIEW.k+')">';
+ out+='<circle cx="0" cy="0" r="388" fill="none" stroke="#241b10" stroke-width="1" stroke-dasharray="4 8"/>';
+ const seen=new Set();
+ CT.nodes.forEach(n=>{(CT.adj[n.id]||[]).forEach(b=>{const key=[n.id,b].sort().join('-');if(seen.has(key))return;seen.add(key);
+  const a=CT.byId[n.id],c2=CT.byId[b];if(!a||!c2)return;const on=ta[n.id]&&ta[b];
+  out+='<line x1="'+a.x+'" y1="'+a.y+'" x2="'+c2.x+'" y2="'+c2.y+'" stroke="'+(on?col:'#332a1c')+'" stroke-width="'+(on?2.6:1.4)+'" opacity="'+(on?0.95:0.7)+'"/>';});});
+ CT.nodes.forEach(n=>{
+  const on=!!ta[n.id];const av=!on&&canAllocCT(n.id);
+  const r=n.kind==='mastery'?13:n.kind==='origin'?9:8;
+  const fill=on?col:'#141008';const stroke=on?col:av?col:'#4a3d28';
+  const rankNum=n.kind==='rank'?n.id.split('_')[2]:'';
+  out+='<g class="nd '+(av?'av':'')+'" data-id="'+n.id+'">'
+  +'<circle class="halo" cx="'+n.x+'" cy="'+n.y+'" r="'+(r+7)+'" fill="none" stroke="'+col+'" stroke-width="1.5" opacity="0"/>'
+  +'<circle class="core" cx="'+n.x+'" cy="'+n.y+'" r="'+r+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+(on?2.5:1.6)+'" '+(on?'style="filter:drop-shadow(0 0 5px '+col+')"':'')+'/>';
+  if(n.kind==='mastery')out+='<circle cx="'+n.x+'" cy="'+n.y+'" r="'+(r+4)+'" fill="none" stroke="'+(on?col:'#5a4526')+'" stroke-width="1.2" stroke-dasharray="3 3"/><text x="'+n.x+'" y="'+(n.y+4)+'" text-anchor="middle" font-size="11" fill="'+(on?'#120d07':'#5a4526')+'" style="pointer-events:none">★</text>';
+  if(n.kind==='rank')out+='<text x="'+n.x+'" y="'+(n.y+3.5)+'" text-anchor="middle" font-size="9" fill="'+(on?'#120d07':'#7a6a48')+'" style="pointer-events:none;font-weight:bold">'+rankNum+'</text>';
+  out+='</g>';});
+ out+='</g>';svg.innerHTML=out;
+ if(!treeBuilt){VIEW={x:W/2,y:H/2,k:Math.max(0.45,Math.min(W,H)/950)};treeBuilt=true;}
+ applyView();
+ svg.onpointerdown=e=>{svg.setPointerCapture(e.pointerId);
+  dragS={x:e.clientX,y:e.clientY,vx:VIEW.x,vy:VIEW.y,moved:0,el:(e.target&&e.target.closest)?e.target.closest('.nd'):null};
+  svg.classList.add('grab');};
+ svg.onpointermove=e=>{if(!dragS)return;const dx=e.clientX-dragS.x,dy=e.clientY-dragS.y;dragS.moved=Math.max(dragS.moved,Math.abs(dx)+Math.abs(dy));VIEW.x=dragS.vx+dx;VIEW.y=dragS.vy+dy;applyView();};
+ svg.onpointerup=e=>{svg.classList.remove('grab');
+  if(dragS&&dragS.moved<6){const el=dragS.el||((e.target&&e.target.closest)?e.target.closest('.nd'):null);if(el)allocNode(el.dataset.id);}
+  dragS=null;};
+ svg.onwheel=e=>{e.preventDefault();const rect=svg.getBoundingClientRect();const mx=e.clientX-rect.left,my=e.clientY-rect.top;
+  const f=e.deltaY>0?0.88:1.14;const k2=Math.max(0.3,Math.min(3,VIEW.k*f));
+  VIEW.x=mx-(mx-VIEW.x)*(k2/VIEW.k);VIEW.y=my-(my-VIEW.y)*(k2/VIEW.k);VIEW.k=k2;applyView();};
+ svg.querySelectorAll('.nd').forEach(g=>{g.addEventListener('mouseenter',e=>showTT(g.dataset.id,e));g.addEventListener('mouseleave',hideTT);});}
+function applyView(){const g=$('tg');if(g)g.setAttribute('transform','translate('+VIEW.x+','+VIEW.y+') scale('+VIEW.k+')');}
+function showTT(id,e){if(!CT)return;const nd=CT.byId[id];if(!nd)return;const tt=$('tt');const ta=talloc();
+ let html='';
+ if(nd.kind==='origin')html='<b style="color:var(--gold)">Начало</b><div class="m">Отсюда расходятся шесть путей.</div>';
+ else{const key=CLASSES[S.hero.cls].skills[nd.si];const sk=SKILLDB[key];const rk=skillRank(nd.si);
+  if(nd.kind==='mastery')html='<b style="color:'+CLASSES[S.hero.cls].col+'">★ '+sk.n+': мастерство</b>'
+   +'<div class="m">'+sk.md+'</div><div style="color:var(--dim);font-size:12px;margin-top:3px">'+sk.txt+'</div>'
+   +'<div class="st">'+(ta[id]?'✓ освоено':canAllocCT(id)?'можно освоить · 1 очко (нужен ранг 5)':'нужен 5-й ранг умения')+'</div>';
+  else html='<b style="color:'+CLASSES[S.hero.cls].col+'">'+sk.n+' — ранг '+rk+'/5</b>'
+   +'<div class="m">'+skillEffTxt(key,Math.max(1,rk))+'</div>'
+   +'<div style="color:var(--dim);font-size:12px;margin-top:3px">'+sk.txt+'</div>'
+   +'<div style="color:var(--gold2);font-size:12px;margin-top:3px">Мастерство (после 5-го ранга): '+sk.md+'</div>'
+   +'<div class="st">'+(ta[id]?'✓ освоено':canAllocCT(id)?'можно освоить · 1 очко навыков':'нужен предыдущий ранг')+'</div>';}
+ tt.innerHTML=html;
+ const wr=$('treewrap').getBoundingClientRect();tt.style.display='block';
+ tt.style.left=Math.min(e.clientX-wr.left+14,wr.width-300)+'px';tt.style.top=Math.min(e.clientY-wr.top+10,wr.height-140)+'px';}
+function hideTT(){const t=$('tt');if(t)t.style.display='none';}
+
+/* ================= БОЙ РЕНДЕР ================= */
+function renderCombat(){const m=$('main');if(!COM){show('map');return;}const e=COM.e,c=S.cs,h=S.hero;
+ const ehp=Math.max(0,e.hp)/e.maxhp*100;
+ const traitTag=e.trait?'<span style="color:'+e.trait.c+'">'+e.trait.icon+' '+e.trait.n+'</span> · ':'';
+ const elemTag=e.elem?'<span style="color:'+ELEMS[e.elem].c+'">'+ELEMS[e.elem].icon+' '+ELEMS[e.elem].n+'</span> · ':'';
+ let html='<h2 class="pt">'+(e.boss?'☠ Битва с хранителем':'⚔ Бой')+'</h2>';
+ html+='<div class="panel" style="padding:8px 14px;margin-bottom:12px;font-size:12.5px;color:var(--dim)">Герой бьёт сам — жми умения, когда они готовы. Полосы под портретами — размах атаки. Эликсиры и зелья делят перезарядку 2 с.</div>';
+ html+='<div id="arena">'
+ +'<div class="combatant" id="pcard"><div class="tag">'+RACES[h.race].name+' · ур. '+h.lvl+'</div>'
+ +'<div class="face" id="pface">'+CLASSES[h.cls].icon+'</div><h3>'+h.name+'</h3>'
+ +'<div id="pstat" style="font-size:12px;color:#9fd0a8;min-height:16px">'+(COM.pdot?(COM.pdot.k==='fire'?'🔥 горит':'☠ отравлен'):'')+'</div>'
+ +'<div class="bar hp" style="margin-top:4px"><i id="php" style="width:'+(Math.max(0,h.hp)/c.maxhp*100)+'%"></i><span id="phpt">'+fmt(Math.max(0,h.hp))+' / '+fmt(c.maxhp)+'</span></div>'
+ +'<div class="bar mp" style="margin-top:4px"><i id="pmpi" style="width:'+(h.mp/c.maxmp*100)+'%"></i><span id="pmpt">'+fmt(h.mp)+' маны</span></div>'
+ +'<div class="chlabel">РАЗМАХ</div>'
+ +'<div class="bar" style="height:6px"><i id="patk" style="width:0%;background:linear-gradient(90deg,#d3a44c,#f0cf8a)"></i></div></div>'
+ +'<div class="combatant enemy '+(e.boss?'boss':'')+'" id="ecard"><div class="tag">'+traitTag+elemTag+(e.boss?'ХРАНИТЕЛЬ ЗЕМЛИ':e.elite?'матёрый':'противник')+' · ур. '+e.lv+'</div>'
+ +'<div class="face" id="eface">'+e.f+'</div><h3>'+e.n+'</h3>'
+ +'<div style="font-size:12px;color:var(--dim);min-height:16px">'+(e.stun>0?'❄ оглушён':e.dot>0?'☠ терзает эффект':'')+'</div>'
+ +'<div class="bar hp" style="margin-top:4px"><i id="ehp" style="width:'+ehp+'%"></i><span id="ehpt">'+fmt(Math.max(0,e.hp))+' / '+fmt(e.maxhp)+'</span></div>'
+ +'<div class="chlabel">ЗАМАХ</div>'
+ +'<div class="bar" style="height:6px"><i id="eatk" style="width:0%;background:linear-gradient(90deg,#8c2020,#e0605a)"></i></div></div></div>';
+ html+='<div id="cfeed"></div>';
+ html+='<div class="skillbar">';
+ CLASSES[h.cls].skills.forEach((key,si)=>{const s=SKILLDB[key];const rk=skillRank(si);
+  if(rk<1){html+='<button class="btn" disabled title="Изучи в древе умений">'+s.n+'<small>не изучено</small></button>';return;}
+  html+='<button class="btn" id="skb_'+key+'" onclick="useSkill(\''+key+'\')" title="'+s.txt+(hasMastery(si)?' · МАСТЕРСТВО: '+s.md:'')+'">'+s.n+(hasMastery(si)?'★':'')+'<small>ранг '+rk+' · '+s.mp+' маны</small></button>';});
+ html+='<button class="btn" id="potH" onclick="drinkPot(\'hp\')">🧪 ОЗ ('+h.pots.hp+')<small>зелье</small></button>';
+ html+='<button class="btn" id="potM" onclick="drinkPot(\'mp\')">🧪 Мана ('+h.pots.mp+')<small>зелье</small></button>';
+ ['rage','stone','swift'].forEach(k=>{html+='<button class="btn" id="elx_'+k+'" onclick="useElixir(\''+k+'\')" '+((S.hero.elix[k]>0)?'':'disabled')+'>'+ELIXN[k].icon+' '+ELIXN[k].n.split(' ')[1]+'<small>×'+S.hero.elix[k]+'</small></button>';});
+ html+='<button class="btn danger" onclick="tryFlee()" '+(e.boss?'disabled':'')+'>💨 Побег<small>'+(60+(sp('whisper')?15:0))+'%</small></button>';
+ html+='</div>';
+ m.innerHTML=html;
+ feed('Бой начался. '+(e.boss?e.n+' смотрит на тебя, как на очередную надпись на надгробии.':e.trait?e.trait.icon+' '+e.n+' — '+e.trait.n.toLowerCase()+'. Будь осторожен.':e.n+' преграждает путь!')+(e.elem?' Враг владеет стихией: '+ELEMS[e.elem].icon+' '+ELEMS[e.elem].n+'. Проверь сопротивления!':''),'s');
+ renderCombatLive();}
+
+/* ================= СОЗДАНИЕ ================= */
+function renderCreate(){
+ $('racegrid').innerHTML=Object.keys(RACES).map(k=>{const r=RACES[k];
+  return '<div class="selcard '+(selR===k?'on':'')+'" onclick="selR=\''+k+'\';renderCreate()"><h4>'+r.icon+' '+r.name+'</h4><p>'+r.desc+'</p><div class="bn">✦ '+r.trait+'</div></div>';}).join('');
+ $('classgrid').innerHTML=Object.keys(CLASSES).map(k=>{const c=CLASSES[k];
+  return '<div class="selcard '+(selC===k?'on':'')+'" onclick="selC=\''+k+'\';renderCreate()"><h4>'+c.icon+' '+c.name+'</h4><p>'+c.desc+'</p><div class="bn">Умения: '+c.skills.slice(0,3).map(s=>SKILLDB[s].n).join(', ')+' — и другие в древе</div></div>';}).join('');
+ $('csum').innerHTML='Выбор: <b style="color:var(--gold)">'+RACES[selR].name+' '+CLASSES[selC].name+'</b>. За уровни — очки навыков и характеристик.';}
+function startGame(){
+ try{
+  const name=($('cname').value.trim()||'Безымянный');
+  S={page:'hub',gold:60,frag:2,buff:null,log:[],ui:{mapPage:0},
+   hero:{name:name,race:selR,cls:selC,lvl:1,xp:0,pts:1,sp:0,hp:1,mp:1,kills:0,dungeons:0,bosses:{},
+    inv:[],eq:{},talloc:{origin:true,r_0_1:true},bonus:{str:0,dex:0,int:0,vit:0,luk:0},
+    pots:{hp:2,mp:1},prot:0,troph:{},gems:{},elix:{rage:0,stone:0,swift:0}}};
+  buildClassTree();
+  calcStats();
+  S.hero.hp=S.cs.maxhp;S.hero.mp=S.cs.maxmp;
+  S.hero.eq.weapon=genItem(1,0,0);
+  S.hero.eq.armor=genItem(1,0,0);
+  S.board={orders:[genOrder(),genOrder(),genOrder()]};
+  S.shopStock=genShopStock();
+  $('create').style.display='none';
+  $('app').style.display='grid';
+  log('⚜ <b>'+name+'</b>, '+RACES[selR].name.toLowerCase()+' '+CLASSES[selC].name.toLowerCase()+', входит в Грейхолд. Врата закрываются за спиной.','story');
+  log('Совет: загляни на <b>доску заказов</b>, распредели очки в <b>Герое</b> и <b>древе умений</b>, затем выходи на охоту в Волчий лес.','sys');
+  save();renderAll();
+ }catch(e){showErr('startGame: '+e.message);console.error(e);}
+}
+
+/* ================= FX ================= */
+const cv=$('fx'),cx=cv.getContext('2d');const embers=[];
+function fxResize(){cv.width=innerWidth;cv.height=innerHeight;}
+addEventListener('resize',fxResize);fxResize();
+for(let i=0;i<60;i++)embers.push({x:Math.random()*innerWidth,y:Math.random()*innerHeight,v:R(0.2,0.9),s:R(1,2.6),a:R(0.1,0.6),w:R(0,6.28)});
+(function loop(){cx.clearRect(0,0,cv.width,cv.height);
+ embers.forEach(p=>{p.y-=p.v;p.w+=0.02;p.x+=Math.sin(p.w)*0.3;if(p.y<-10){p.y=innerHeight+10;p.x=Math.random()*innerWidth;}
+  cx.globalAlpha=p.a*(0.6+0.4*Math.sin(p.w*2));cx.fillStyle=Math.random()<0.1?'#f0cf8a':'#e0653a';
+  cx.beginPath();cx.arc(p.x,p.y,p.s,0,6.28);cx.fill();});
+ cx.globalAlpha=1;requestAnimationFrame(loop);})();
+
+/* ================= СТАРТ ================= */
+function initGame(){
+ try{
+  const sv=localStorage.getItem('AS2');
+  if(sv){
+   S=JSON.parse(sv);
+   S.ui=S.ui||{mapPage:0};S.log=S.log||[];
+   S.hero.pots=S.hero.pots||{hp:0,mp:0};
+   if(!S.hero.talloc)S.hero.talloc={origin:true,r_0_1:true};
+   if(!S.hero.bonus)S.hero.bonus={str:0,dex:0,int:0,vit:0,luk:0};
+   if(S.hero.sp===undefined)S.hero.sp=3*Math.max(0,S.hero.lvl-1);
+   if(!S.hero.troph)S.hero.troph={};
+   if(!S.hero.gems)S.hero.gems={};
+   if(!S.hero.elix)S.hero.elix={rage:0,stone:0,swift:0};
+   if(!S.board||!S.board.orders)S.board={orders:[genOrder(),genOrder(),genOrder()]};
+   S.hero.prot=S.hero.prot||0;
+   buildClassTree();S.cs=null;calcStats();
+   if(!S.shopStock||!S.shopStock.length)S.shopStock=genShopStock();
+   $('create').style.display='none';$('app').style.display='grid';
+   log('Летопись продолжается.','sys');renderAll();
+  } else renderCreate();
+ }catch(e){showErr('init: '+e.message);console.error(e);renderCreate();}
+}
+initGame();
+</script>
+</body>
+</html>
+</body>
+</html>
