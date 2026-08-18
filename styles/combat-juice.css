@@ -1,0 +1,299 @@
+/* =====================================================
+   БОЕВОЙ СОК
+   Без звука и без тряски
+   ===================================================== */
+
+/* Полностью отключаем тряску */
+.shake {
+  animation: none !important;
+}
+
+/* Если вдруг где-то остался hit-stop, гасим его */
+body.hit-stop #app {
+  animation: none !important;
+}
+
+/* Боевые карточки лучше реагируют на анимации */
+.combatant {
+  will-change: transform, filter;
+}
+
+/* =============================== */
+/* Рывки и отдача                  */
+/* =============================== */
+
+.cj-lunge-right {
+  animation: cjLungeRight 0.26s ease;
+}
+
+@keyframes cjLungeRight {
+  0% {
+    transform: translateX(0) scale(1);
+  }
+
+  35% {
+    transform: translateX(10px) scale(1.012);
+  }
+
+  100% {
+    transform: translateX(0) scale(1);
+  }
+}
+
+.cj-lunge-left {
+  animation: cjLungeLeft 0.26s ease;
+}
+
+@keyframes cjLungeLeft {
+  0% {
+    transform: translateX(0) scale(1);
+  }
+
+  35% {
+    transform: translateX(-10px) scale(1.012);
+  }
+
+  100% {
+    transform: translateX(0) scale(1);
+  }
+}
+
+.cj-recoil {
+  animation: cjRecoil 0.24s ease;
+}
+
+@keyframes cjRecoil {
+  0% {
+    transform: translateX(0);
+  }
+
+  30% {
+    transform: translateX(-6px);
+  }
+
+  100% {
+    transform: translateX(0);
+  }
+}
+
+/* =============================== */
+/* Вспышки попаданий               */
+/* =============================== */
+
+.cj-hit {
+  animation: cjHit 0.22s ease;
+}
+
+@keyframes cjHit {
+  0% {
+    filter: brightness(1) saturate(1);
+  }
+
+  30% {
+    filter: brightness(1.55) saturate(1.25);
+  }
+
+  100% {
+    filter: brightness(1) saturate(1);
+  }
+}
+
+.cj-crit-flash {
+  animation: cjCritFlash 0.32s ease;
+}
+
+@keyframes cjCritFlash {
+  0% {
+    box-shadow: 0 0 0 rgba(240, 207, 138, 0);
+  }
+
+  35% {
+    box-shadow:
+      0 0 22px rgba(240, 207, 138, 0.42),
+      inset 0 0 18px rgba(240, 207, 138, 0.12);
+  }
+
+  100% {
+    box-shadow: 0 0 0 rgba(240, 207, 138, 0);
+  }
+}
+
+/* =============================== */
+/* Лечение                         */
+/* =============================== */
+
+.cj-heal-glow {
+  animation: cjHealGlow 0.55s ease;
+}
+
+@keyframes cjHealGlow {
+  0% {
+    box-shadow: 0 0 0 rgba(143, 224, 143, 0);
+  }
+
+  35% {
+    box-shadow:
+      0 0 22px rgba(143, 224, 143, 0.36),
+      inset 0 0 16px rgba(143, 224, 143, 0.10);
+  }
+
+  100% {
+    box-shadow: 0 0 0 rgba(143, 224, 143, 0);
+  }
+}
+
+/* =============================== */
+/* Ярость босса                    */
+/* =============================== */
+
+.cj-enrage {
+  animation: cjEnrage 0.9s ease;
+}
+
+@keyframes cjEnrage {
+  0% {
+    box-shadow: 0 0 0 rgba(192, 64, 64, 0);
+  }
+
+  30% {
+    box-shadow:
+      0 0 28px rgba(192, 64, 64, 0.46),
+      inset 0 0 22px rgba(192, 64, 64, 0.14);
+  }
+
+  100% {
+    box-shadow: 0 0 0 rgba(192, 64, 64, 0);
+  }
+}
+
+/* =============================== */
+/* Смерть врага                    */
+/* =============================== */
+
+.cj-dying {
+  animation: cjDeath 0.55s ease forwards;
+}
+
+@keyframes cjDeath {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+    filter: grayscale(0) brightness(1);
+  }
+
+  40% {
+    opacity: 0.9;
+    transform: scale(0.985);
+    filter: grayscale(0.35) brightness(1.25);
+  }
+
+  100% {
+    opacity: 0.12;
+    transform: scale(0.93) translateY(6px);
+    filter: grayscale(1) brightness(1.6) blur(1px);
+  }
+}
+
+/* =============================== */
+/* Частицы                         */
+/* =============================== */
+
+.cj-particle {
+  position: absolute;
+  z-index: 6;
+  width: var(--s, 5px);
+  height: var(--s, 5px);
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0;
+  animation: cjParticle var(--dur, 0.6s) ease-out forwards;
+}
+
+@keyframes cjParticle {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform:
+      translate(
+        calc(-50% + var(--dx, 0px)),
+        calc(-50% + var(--dy, -30px))
+      )
+      scale(0.35);
+  }
+}
+
+/* Физический удар */
+.cj-phys {
+  background: #d8c8a8;
+  box-shadow: 0 0 8px rgba(216, 200, 168, 0.55);
+}
+
+/* Крит */
+.cj-crit {
+  background: #f0cf8a;
+  box-shadow: 0 0 10px rgba(240, 207, 138, 0.75);
+}
+
+/* Огонь */
+.cj-fire {
+  background: #ff8c4a;
+  box-shadow: 0 0 10px rgba(255, 140, 74, 0.75);
+}
+
+/* Яд */
+.cj-poison {
+  background: #7fb95c;
+  box-shadow: 0 0 10px rgba(127, 185, 92, 0.75);
+}
+
+/* Лёд */
+.cj-ice {
+  background: #8fd0ff;
+  box-shadow: 0 0 10px rgba(143, 208, 255, 0.75);
+}
+
+/* Молния */
+.cj-light {
+  background: #ffe06a;
+  box-shadow: 0 0 10px rgba(255, 224, 106, 0.75);
+}
+
+/* Тьма */
+.cj-shadow {
+  background: #b48fe0;
+  box-shadow: 0 0 10px rgba(180, 143, 224, 0.75);
+}
+
+/* Лечение */
+.cj-heal {
+  background: #8fe08f;
+  box-shadow: 0 0 10px rgba(143, 224, 143, 0.75);
+}
+
+/* Смерть/пепел */
+.cj-death {
+  background: #c9bda7;
+  box-shadow: 0 0 8px rgba(201, 189, 167, 0.45);
+}
+
+/* =============================== */
+/* Доступность                     */
+/* =============================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .cj-lunge-right,
+  .cj-lunge-left,
+  .cj-recoil,
+  .cj-hit,
+  .cj-crit-flash,
+  .cj-heal-glow,
+  .cj-enrage,
+  .cj-dying,
+  .cj-particle {
+    animation: none !important;
+  }
+}

@@ -1,0 +1,207 @@
+/* =====================================================
+   ДАНЖ: атмосфера, туман, подсветка комнат
+   ===================================================== */
+
+body.dungeon-active::before {
+  background:
+    radial-gradient(1000px 600px at 50% -10%, rgba(35, 22, 12, 0.52), transparent 60%),
+    radial-gradient(800px 500px at 15% 110%, rgba(18, 12, 8, 0.58), transparent 65%),
+    radial-gradient(600px 320px at 85% 20%, rgba(120, 40, 25, 0.06), transparent 55%);
+}
+
+/* Панель с картой данжа */
+.dungeon-map {
+  position: relative;
+  overflow: hidden;
+  border-color: rgba(211, 164, 76, 0.18);
+  background:
+    radial-gradient(800px 480px at 50% 20%, rgba(38, 27, 15, 0.72), rgba(11, 9, 6, 0.92)),
+    var(--pan);
+  box-shadow:
+    0 18px 46px rgba(0, 0, 0, 0.38),
+    inset 0 0 42px rgba(0, 0, 0, 0.26);
+}
+
+/* Туман */
+.dungeon-map::before {
+  content: "";
+  position: absolute;
+  inset: -22%;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.22;
+  background:
+    radial-gradient(220px 140px at 20% 30%, rgba(226, 205, 170, 0.14), transparent 70%),
+    radial-gradient(260px 160px at 75% 22%, rgba(226, 205, 170, 0.10), transparent 70%),
+    radial-gradient(240px 170px at 58% 78%, rgba(226, 205, 170, 0.12), transparent 70%),
+    radial-gradient(180px 120px at 32% 82%, rgba(226, 205, 170, 0.08), transparent 70%);
+  animation: dungeonFog 18s linear infinite alternate;
+}
+
+@keyframes dungeonFog {
+  from {
+    transform: translate3d(-1.5%, -1%, 0) scale(1);
+  }
+
+  to {
+    transform: translate3d(1.8%, 1.2%, 0) scale(1.04);
+  }
+}
+
+/* Виньетка карты */
+.dungeon-map::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  box-shadow:
+    inset 0 0 70px rgba(0, 0, 0, 0.46),
+    inset 0 0 160px rgba(0, 0, 0, 0.18);
+}
+
+.dungeon-map svg {
+  position: relative;
+  z-index: 1;
+}
+
+/* Комнаты */
+.droom {
+  transition:
+    opacity 0.18s ease,
+    filter 0.18s ease;
+}
+
+.droom rect {
+  transition:
+    stroke 0.16s ease,
+    filter 0.16s ease,
+    stroke-width 0.16s ease;
+}
+
+.droom.av:hover rect {
+  stroke: var(--gold) !important;
+  filter: drop-shadow(0 0 9px rgba(211, 164, 76, 0.32));
+}
+
+.droom.av {
+  cursor: pointer;
+}
+
+.droom.done {
+  opacity: 0.56;
+  filter: saturate(0.72);
+}
+
+/* Текущая комната */
+.droom[data-here="1"] rect {
+  animation: hereRoomPulse 1.9s infinite ease-in-out;
+}
+
+@keyframes hereRoomPulse {
+  0%,
+  100% {
+    stroke-opacity: 0.95;
+    filter: drop-shadow(0 0 8px rgba(240, 207, 138, 0.22));
+  }
+
+  50% {
+    stroke-opacity: 0.45;
+    filter: drop-shadow(0 0 15px rgba(240, 207, 138, 0.36));
+  }
+}
+
+/* Босс */
+.droom[data-rt="boss"] rect {
+  filter: drop-shadow(0 0 12px rgba(192, 64, 64, 0.36));
+}
+
+.droom[data-rt="boss"] {
+  animation: bossRoomBreath 2.3s infinite ease-in-out;
+}
+
+@keyframes bossRoomBreath {
+  0%,
+  100% {
+    opacity: 0.92;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Сундуки */
+.droom[data-rt="chest"] rect,
+.droom[data-rt="locked"] rect {
+  filter: drop-shadow(0 0 9px rgba(212, 175, 55, 0.24));
+}
+
+/* Алтарь */
+.droom[data-rt="altar"] rect {
+  filter: drop-shadow(0 0 10px rgba(79, 179, 165, 0.28));
+}
+
+/* Торговец */
+.droom[data-rt="merch"] rect {
+  filter: drop-shadow(0 0 8px rgba(240, 207, 138, 0.18));
+}
+
+/* Костёр */
+.droom[data-rt="rest"] rect {
+  filter: drop-shadow(0 0 9px rgba(224, 101, 58, 0.26));
+}
+
+/* Ловушки */
+.droom[data-rt="trap"] rect {
+  filter: drop-shadow(0 0 7px rgba(255, 120, 90, 0.16));
+}
+
+/* Подписи комнат */
+.droom text {
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.45));
+}
+
+/* Коридоры */
+.dungeon-map rect[rx="3"] {
+  opacity: 0.9;
+}
+
+/* Небольшое появление карты */
+.dungeon-map svg {
+  animation: dungeonMapIn 0.28s ease;
+}
+
+@keyframes dungeonMapIn {
+  from {
+    opacity: 0;
+    transform: translateY(7px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Мобильная корректировка */
+@media (max-width: 700px) {
+  .dungeon-map::before {
+    opacity: 0.16;
+  }
+
+  .dungeon-map::after {
+    box-shadow:
+      inset 0 0 42px rgba(0, 0, 0, 0.42);
+  }
+}
+
+/* Уважение к reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .dungeon-map::before,
+  .droom[data-here="1"] rect,
+  .droom[data-rt="boss"],
+  .dungeon-map svg {
+    animation: none !important;
+  }
+}

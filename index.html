@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Пепел и Сталь</title>
+
+  <link rel="stylesheet" href="styles/main.css">
+  <link rel="stylesheet" href="styles/effects.css">
+  <link rel="stylesheet" href="styles/dungeon.css">
+  <link rel="stylesheet" href="styles/combat-juice.css">
+</head>
+<body>
+  <canvas id="fx" class="fx-layer"></canvas>
+  <canvas id="ash" class="fx-layer"></canvas>
+
+  <div id="create">
+    <h1 class="create-title">ПЕПЕЛ И СТАЛЬ</h1>
+    <div class="create-subtitle">ХРОНИКИ ВЫЖЖЕННЫХ ЗЕМЕЛЬ</div>
+
+    <div class="panel">
+      <h2 class="create-panel-title">Рождение героя</h2>
+      <div class="create-tagline">
+        Пепел падает с небес сотый год. Восемь твердынь держатся — им нужен клинок.
+      </div>
+
+      <div class="create-label">РАСА</div>
+      <div class="selgrid" id="racegrid"></div>
+
+      <div class="create-label">КЛАСС</div>
+      <div class="selgrid" id="classgrid"></div>
+
+      <div class="create-actions">
+        <input
+          id="cname"
+          class="name-input"
+          maxlength="16"
+          placeholder="Имя героя…"
+        >
+        <button class="btn big gold" onclick="startGame()">
+          ⚔ Вступить в Грейхолд
+        </button>
+      </div>
+
+      <div id="csum" class="create-summary"></div>
+    </div>
+  </div>
+
+  <div id="app" style="display:none">
+    <div class="topbar">
+      <div class="crest">ПЕПЕЛ И СТАЛЬ</div>
+
+      <div class="tb-name">
+        <b id="t-name"></b>
+        <span id="t-race"></span>
+      </div>
+
+      <span class="lv" id="t-lvl">1</span>
+      <span id="topbar-rank" class="rank-badge">🪵 Деревянный</span>
+
+      <div class="tb-bars">
+        <div class="bar hp">
+          <i id="b-hp"></i>
+          <span id="t-hp"></span>
+        </div>
+
+        <div class="bar mp">
+          <i id="b-mp"></i>
+          <span id="t-mp"></span>
+        </div>
+
+        <div class="bar xp">
+          <i id="b-xp"></i>
+          <span id="t-xp" class="xp-text"></span>
+        </div>
+      </div>
+
+      <div class="res">
+        <span class="gold-text" id="t-gold"></span>
+        <span class="frag-text" id="t-frag"></span>
+
+        <button
+          class="btn small"
+          style="margin-left:auto"
+          onclick="if(confirm('Начать заново? Прогресс будет стёрт.')){localStorage.removeItem('AS3');location.reload();}"
+        >
+          Новая игра
+        </button>
+      </div>
+    </div>
+
+    <div id="main"></div>
+
+    <div id="logpane">
+      <b class="log-title">📜 Летопись</b>
+      <div id="logbox"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+  <div id="err"></div>
+
+  <!-- =============================== -->
+  <!-- ДАННЫЕ                          -->
+  <!-- =============================== -->
+  <script src="data/races.js"></script>
+  <script src="data/classes.js"></script>
+  <script src="data/skills.js"></script>
+  <script src="data/stats.js"></script>
+  <script src="data/enemies.js"></script>
+  <script src="data/zones.js"></script>
+
+  <script src="data/item-names.js"></script>
+  <script src="data/item-affixes.js"></script>
+  <script src="data/uniques.js"></script>
+  <script src="data/gems.js"></script>
+  <script src="data/elements.js"></script>
+  <script src="data/trophies.js"></script>
+  <script src="data/foods.js"></script>
+  <script src="data/recipes.js"></script>
+  <script src="data/titles.js"></script>
+  <script src="data/ranks.js"></script>
+
+  <!-- =============================== -->
+  <!-- ЯДРО                            -->
+  <!-- =============================== -->
+  <script src="js/core/utils.js"></script>
+  <script src="js/core/state.js"></script>
+  <script src="js/core/save.js"></script>
+  <script src="js/core/log.js"></script>
+  <script src="js/core/fx.js"></script>
+
+  <!-- =============================== -->
+  <!-- СИСТЕМЫ                         -->
+  <!-- =============================== -->
+  <script src="js/systems/stats.js"></script>
+  <script src="js/systems/skills.js"></script>
+  <script src="js/systems/items.js"></script>
+  <script src="js/systems/enemy.js"></script>
+  <script src="js/systems/orders.js"></script>
+  <script src="js/systems/economy.js"></script>
+
+  <script src="js/systems/combat.js"></script>
+  <script src="js/systems/dungeon.js"></script>
+  <script src="js/systems/dungeon-update.js"></script>
+  <script src="js/systems/arena.js"></script>
+
+  <script src="js/systems/combat-juice.js"></script>
+
+  <!-- =============================== -->
+  <!-- ИНТЕРФЕЙС                       -->
+  <!-- =============================== -->
+  <script src="js/ui/create.js"></script>
+  <script src="js/ui/topbar.js"></script>
+  <script src="js/ui/town.js"></script>
+  <script src="js/ui/town2.js"></script>
+
+  <!-- Запуск -->
+  <script src="js/main.js"></script>
+
+
+
+  <!-- Запуск -->
+  <script src="js/main.js"></script>  
+</body>
+</html>

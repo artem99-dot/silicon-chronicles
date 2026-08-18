@@ -1,0 +1,716 @@
+/* =====================================================
+   ПЕПЕЛ И СТАЛЬ
+   Пакет полировки: эффекты, анимации, адаптив
+   ===================================================== */
+
+:root {
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 18px;
+
+  --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.22);
+  --shadow-deep: 0 16px 48px rgba(0, 0, 0, 0.42);
+
+  --glow-gold: 0 0 18px rgba(211, 164, 76, 0.18);
+  --glow-blood: 0 0 22px rgba(192, 64, 64, 0.28);
+}
+
+/* =============================== */
+/* Базовая сцена                   */
+/* =============================== */
+
+body {
+  overflow-x: hidden;
+}
+
+body::before {
+  background:
+    radial-gradient(1100px 650px at 72% -12%, rgba(74, 42, 18, 0.34), transparent 60%),
+    radial-gradient(900px 650px at 8% 112%, rgba(38, 22, 10, 0.42), transparent 62%),
+    radial-gradient(700px 320px at 50% 0%, rgba(211, 164, 76, 0.045), transparent 55%);
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 3;
+  background:
+    radial-gradient(ellipse at center, transparent 52%, rgba(0, 0, 0, 0.24) 100%);
+}
+
+#app,
+#create {
+  position: relative;
+  z-index: 4;
+}
+
+::selection {
+  background: rgba(211, 164, 76, 0.24);
+  color: #fff;
+}
+
+/* Скроллбары */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #3a2d1b;
+  border: 2px solid rgba(0, 0, 0, 0.35);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #55411f;
+}
+
+/* =============================== */
+/* Верхняя панель                  */
+/* =============================== */
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.26);
+  border-bottom: 1px solid rgba(211, 164, 76, 0.14);
+}
+
+.crest {
+  text-shadow: 0 0 22px rgba(211, 164, 76, 0.18);
+}
+
+.tb-name b {
+  letter-spacing: 0.02em;
+}
+
+/* =============================== */
+/* Панели и карточки                */
+/* =============================== */
+
+.panel,
+.loccard,
+.selcard,
+.order,
+.foodcard,
+.inncard,
+.item,
+.drow,
+.combatant,
+#tt {
+  border-radius: var(--radius-md);
+}
+
+.panel {
+  box-shadow: var(--shadow-soft);
+  animation: panelIn 0.26s ease;
+}
+
+@keyframes panelIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.loccard,
+.selcard,
+.foodcard,
+.inncard,
+.item,
+.order {
+  transition:
+    transform 0.16s ease,
+    border-color 0.16s ease,
+    box-shadow 0.16s ease,
+    background 0.16s ease,
+    opacity 0.16s ease;
+}
+
+.loccard:hover,
+.selcard:hover,
+.foodcard:hover,
+.inncard:hover,
+.order:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-soft);
+}
+
+.loccard:active,
+.selcard:active {
+  transform: translateY(0) scale(0.995);
+}
+
+.item:hover {
+  background: rgba(255, 255, 255, 0.045);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+}
+
+/* =============================== */
+/* Кнопки                          */
+/* =============================== */
+
+.btn {
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+  transition:
+    transform 0.14s ease,
+    box-shadow 0.16s ease,
+    border-color 0.16s ease,
+    color 0.16s ease,
+    background 0.16s ease,
+    filter 0.16s ease;
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn:active {
+  transform: translateY(1px) scale(0.99);
+}
+
+.btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    120deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.06) 40%,
+    transparent 60%
+  );
+  transform: translateX(-130%);
+  transition: transform 0.55s ease;
+  pointer-events: none;
+}
+
+.btn:hover::after {
+  transform: translateX(130%);
+}
+
+.btn.gold {
+  box-shadow: 0 0 0 rgba(211, 164, 76, 0);
+}
+
+.btn.gold:hover {
+  box-shadow: 0 0 22px rgba(211, 164, 76, 0.22);
+}
+
+.btn.danger:hover {
+  box-shadow: 0 0 18px rgba(192, 64, 64, 0.18);
+}
+
+.btn:disabled {
+  filter: grayscale(0.45) brightness(0.72);
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.subnav {
+  overflow-x: auto;
+  padding-bottom: 6px;
+  scrollbar-width: none;
+}
+
+.subnav::-webkit-scrollbar {
+  display: none;
+}
+
+.subnav .btn {
+  flex: 0 0 auto;
+}
+
+.subnav .btn.gold {
+  box-shadow: 0 0 18px rgba(211, 164, 76, 0.18);
+}
+
+/* =============================== */
+/* Бары                            */
+/* =============================== */
+
+.bar {
+  border-radius: 999px;
+  box-shadow:
+    inset 0 1px 3px rgba(0, 0, 0, 0.5),
+    0 1px 0 rgba(255, 255, 255, 0.02);
+}
+
+.bar > i {
+  border-radius: inherit;
+  transition:
+    width 0.35s cubic-bezier(0.22, 0.8, 0.35, 1),
+    filter 0.18s ease;
+}
+
+.bar > span {
+  letter-spacing: 0.04em;
+}
+
+.bar.hp > i {
+  box-shadow: 0 0 18px rgba(224, 96, 90, 0.18);
+}
+
+.bar.mp > i {
+  box-shadow: 0 0 18px rgba(106, 168, 232, 0.18);
+}
+
+.bar.xp > i {
+  box-shadow: 0 0 14px rgba(211, 164, 76, 0.16);
+}
+
+/* =============================== */
+/* Создание героя                  */
+/* =============================== */
+
+#create .panel {
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-deep);
+}
+
+.selcard.on {
+  animation: selectedPulse 2.2s infinite;
+}
+
+@keyframes selectedPulse {
+  0%,
+  100% {
+    box-shadow: 0 0 14px rgba(211, 164, 76, 0.14);
+  }
+
+  50% {
+    box-shadow: 0 0 26px rgba(211, 164, 76, 0.28);
+  }
+}
+
+/* =============================== */
+/* Бой                             */
+/* =============================== */
+
+.combatant {
+  box-shadow: var(--shadow-soft);
+  animation: panelIn 0.24s ease;
+}
+
+.combatant .face {
+  filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.35));
+  transition: transform 0.14s ease;
+}
+
+.combatant.enemy .face {
+  filter: drop-shadow(0 8px 16px rgba(192, 64, 64, 0.22));
+}
+
+.combatant.enemy.boss {
+  box-shadow:
+    0 0 26px rgba(192, 64, 64, 0.12),
+    var(--shadow-deep);
+}
+
+.combatant.enemy.boss::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  pointer-events: none;
+  border: 1px solid rgba(192, 64, 64, 0.24);
+  animation: bossRing 2.4s infinite;
+}
+
+@keyframes bossRing {
+  0%,
+  100% {
+    opacity: 0.18;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.55;
+    transform: scale(1.012);
+  }
+}
+
+#cfeed {
+  border-radius: var(--radius-md);
+  box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.18);
+  scrollbar-width: thin;
+}
+
+#cfeed p {
+  animation: feedIn 0.18s ease;
+}
+
+@keyframes feedIn {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.skillbar {
+  padding-bottom: 4px;
+}
+
+.skillbar .btn {
+  min-width: 136px;
+}
+
+.skillbar .btn:not(:disabled):hover {
+  transform: translateY(-2px);
+}
+
+.skillbar .btn:disabled {
+  opacity: 0.55;
+}
+
+/* Вспышка крита */
+body.crit-flash::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 50% 40%, rgba(240, 207, 138, 0.16), transparent 42%);
+  animation: critFlash 0.18s ease forwards;
+}
+
+@keyframes critFlash {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+/* Микро hit-stop */
+body.hit-stop #app {
+  animation: hitStop 0.1s steps(2);
+}
+
+@keyframes hitStop {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(0.997);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Низкое HP */
+#low-hp-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  box-shadow:
+    inset 0 0 110px rgba(192, 64, 64, 0.52),
+    inset 0 0 220px rgba(192, 64, 64, 0.24);
+}
+
+body.low-hp #low-hp-overlay {
+  opacity: 1;
+  animation: lowHpPulse 1.7s infinite;
+}
+
+@keyframes lowHpPulse {
+  0%,
+  100% {
+    opacity: 0.72;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+/* =============================== */
+/* Данж                            */
+/* =============================== */
+
+.droom {
+  animation: roomIn 0.24s ease;
+}
+
+@keyframes roomIn {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.droom.here rect {
+  filter: drop-shadow(0 0 12px rgba(240, 207, 138, 0.35));
+}
+
+.droom.av rect {
+  transition: stroke 0.15s ease, filter 0.15s ease;
+}
+
+.droom.av:hover rect {
+  filter: drop-shadow(0 0 10px rgba(211, 164, 76, 0.28));
+}
+
+.droom.done {
+  filter: saturate(0.75);
+}
+
+/* =============================== */
+/* Древо навыков                   */
+/* =============================== */
+
+#treewrap {
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-deep);
+}
+
+#tt {
+  box-shadow: var(--shadow-deep);
+  animation: tooltipIn 0.12s ease;
+}
+
+@keyframes tooltipIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* =============================== */
+/* Инвентарь                       */
+/* =============================== */
+
+.icell {
+  border-radius: 14px;
+}
+
+.icell:hover {
+  box-shadow:
+    0 8px 18px rgba(0, 0, 0, 0.28),
+    0 0 16px rgba(211, 164, 76, 0.08);
+}
+
+.doll .slot {
+  border-radius: 14px;
+}
+
+.bag .icell {
+  animation: itemPop 0.2s ease;
+}
+
+@keyframes itemPop {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* =============================== */
+/* Тосты                           */
+/* =============================== */
+
+.toast {
+  border-radius: 14px;
+  backdrop-filter: blur(6px);
+  box-shadow:
+    0 14px 38px rgba(0, 0, 0, 0.42),
+    0 0 22px rgba(211, 164, 76, 0.08);
+}
+
+.toast.r1 {
+  border-color: #6fa8dc;
+  color: #a8cdf0;
+}
+
+.toast.r2 {
+  border-color: #ffd24a;
+  color: #ffd24a;
+}
+
+.toast.r3 {
+  border-color: #e0575f;
+  color: #ff9a9f;
+  box-shadow:
+    0 14px 38px rgba(0, 0, 0, 0.42),
+    0 0 24px rgba(224, 87, 95, 0.18);
+}
+
+.toast.r4 {
+  border-color: #ff9d3b;
+  color: #ff9d3b;
+  box-shadow:
+    0 14px 38px rgba(0, 0, 0, 0.42),
+    0 0 30px rgba(255, 157, 59, 0.24);
+}
+
+/* =============================== */
+/* Лог                             */
+/* =============================== */
+
+#logpane {
+  backdrop-filter: blur(6px);
+}
+
+.le {
+  border-radius: 8px;
+  animation: feedIn 0.18s ease;
+}
+
+/* =============================== */
+/* Адаптив                         */
+/* =============================== */
+
+@media (max-width: 1100px) {
+  .invwrap {
+    grid-template-columns: 260px 1fr;
+  }
+}
+
+@media (max-width: 900px) {
+  #main {
+    padding: 12px;
+  }
+
+  .invwrap {
+    grid-template-columns: 1fr;
+  }
+
+  #arena {
+    grid-template-columns: 1fr;
+  }
+
+  .tb-bars {
+    min-width: 100%;
+    max-width: 100%;
+    order: 5;
+  }
+
+  .topbar {
+    gap: 10px;
+    padding: 8px 10px;
+  }
+
+  .crest {
+    font-size: 16px;
+  }
+
+  .tb-name {
+    min-width: 0;
+  }
+
+  .subnav .btn {
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 620px) {
+  .skillbar {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .skillbar .btn {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .doll {
+    grid-template-columns: repeat(3, 58px);
+  }
+
+  .slot,
+  .icell {
+    width: 58px;
+    height: 58px;
+  }
+
+  .icell.sm {
+    width: 48px;
+    height: 48px;
+    font-size: 20px;
+  }
+
+  .bag {
+    gap: 6px;
+  }
+
+  .locgrid {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  }
+
+  .foodgrid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  }
+
+  .order {
+    flex-wrap: wrap;
+  }
+
+  .drow {
+    flex-wrap: wrap;
+  }
+}
+
+/* =============================== */
+/* Доступность                     */
+/* =============================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
