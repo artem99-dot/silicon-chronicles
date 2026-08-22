@@ -1,0 +1,437 @@
+/* =====================================================
+   МОБИЛЬНАЯ ОПТИМИЗАЦИЯ
+   ===================================================== */
+
+/* Чтобы не было синей подсветки тапа */
+body {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Быстрые тач-кнопки */
+.btn,
+.selcard,
+.loccard,
+.invitem,
+.chip.ck {
+  touch-action: manipulation;
+}
+
+/* Мобильный режим по ширине */
+@media (max-width: 760px) {
+  body {
+    font-size: 15px;
+  }
+
+  #main {
+    padding: 10px;
+  }
+
+  /* Верхняя панель не липнет, чтобы бой мог прилипать */
+  .topbar {
+    position: static;
+    gap: 8px;
+    padding: 8px 10px;
+  }
+
+  .crest {
+    font-size: 15px;
+  }
+
+  .tb-name {
+    min-width: 0;
+  }
+
+  .tb-name b {
+    font-size: 14px;
+  }
+
+  .tb-bars {
+    max-width: none;
+    min-width: 100%;
+    order: 5;
+  }
+
+  /* Кнопки крупнее */
+  .btn {
+    min-height: 42px;
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+
+  .btn.small {
+    min-height: 38px;
+    padding: 8px 10px;
+  }
+
+  .btn.big {
+    width: 100%;
+  }
+
+  /* Вкладки города: горизонтальный скролл */
+  .subnav {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .subnav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .subnav .btn {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
+  /* =============================== */
+  /* Бой                              */
+  /* =============================== */
+
+  /*
+    Главное исправление:
+    на телефоне блоки боя прилипают к верху,
+    чтобы HP игрока и врага всегда были видны.
+  */
+  #arena {
+    position: sticky;
+    top: 0;
+    z-index: 35;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    margin: -10px -10px 10px;
+    padding: 7px;
+    background: rgba(11, 10, 8, 0.96);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid rgba(211, 164, 76, 0.16);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22);
+  }
+
+  .combatant {
+    padding: 7px;
+    border-radius: 12px;
+    min-width: 0;
+  }
+
+  .combatant .face {
+    font-size: 24px;
+    line-height: 1;
+    margin: 2px 0;
+  }
+
+  .combatant h3 {
+    font-size: 12px;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .combatant .tag {
+    display: none;
+  }
+
+  .chlabel {
+    display: none;
+  }
+
+  .combatant .bar {
+    height: 13px;
+    margin-top: 3px;
+  }
+
+  .combatant .bar span {
+    font-size: 8px;
+  }
+
+  .combatant .bar.hp {
+    height: 14px;
+  }
+
+  .combatant .bar.mp {
+    height: 9px;
+  }
+
+  #pstat {
+    font-size: 9px;
+    min-height: 11px;
+  }
+
+  /* Полоски замаха можно оставить, но сделать тоньше */
+  #arena .bar[style] {
+    height: 4px !important;
+  }
+
+  /* Лог боя компактнее */
+  #cfeed {
+    height: 120px;
+    font-size: 12px;
+    padding: 8px;
+  }
+
+  /* Умения крупнее и в 2 колонки */
+  .skillbar {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .skillbar .btn {
+    min-width: 0;
+    width: 100%;
+    padding: 11px 8px;
+  }
+
+  .skillbar .btn small {
+    font-size: 9px;
+    line-height: 1.25;
+  }
+
+  /* =============================== */
+  /* Инвентарь                       */
+  /* =============================== */
+
+  .invwrap {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .doll {
+    grid-template-columns: repeat(3, 58px);
+  }
+
+  .slot,
+  .icell {
+    width: 58px;
+    height: 58px;
+  }
+
+  .icell.sm {
+    width: 50px;
+    height: 50px;
+    font-size: 21px;
+  }
+
+  .bag {
+    display: block;
+  }
+
+  .invitem {
+    grid-template-columns: 48px 1fr auto;
+    gap: 8px;
+    padding: 10px;
+  }
+
+  .invitem .invicon {
+    width: 48px;
+    height: 48px;
+    font-size: 25px;
+  }
+
+  .invitem .invname {
+    font-size: 13px;
+  }
+
+  .invitem .invstats {
+    font-size: 11px;
+  }
+
+  .invitem .invright {
+    font-size: 11px;
+  }
+
+  /* Сравнение */
+  .cmp-row {
+    font-size: 13px;
+    gap: 8px;
+  }
+
+  .cmp-diff {
+    font-size: 12px;
+  }
+
+  /* =============================== */
+  /* Древо навыков                   */
+  /* =============================== */
+
+  #treewrap {
+    height: auto;
+    border: none;
+    background: none;
+    overflow: visible;
+  }
+
+  #treesvg {
+    display: none;
+  }
+
+  .tree-skill {
+    grid-template-columns: 1fr;
+  }
+
+  .tree-select-btn {
+    width: 100%;
+  }
+
+  .tree-confirm {
+    top: 0;
+    border-radius: 14px;
+  }
+
+  /* =============================== */
+  /* Город и прочие экраны            */
+  /* =============================== */
+
+  .locgrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .loccard {
+    padding: 10px;
+  }
+
+  .loccard .lic {
+    font-size: 25px;
+  }
+
+  .loccard h4 {
+    font-size: 13px;
+  }
+
+  .foodgrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .order {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .order .oi {
+    display: none;
+  }
+
+  .drow {
+    flex-wrap: wrap;
+  }
+
+  .drow .nm2 {
+    font-size: 13px;
+  }
+
+  /* Таверна/гостиница/кузница */
+  .inncard,
+  .foodcard {
+    padding: 10px;
+  }
+
+  /* Врата */
+  .panel .drow .btn.small {
+    width: 100%;
+  }
+
+  /* Лог */
+  #logpane {
+    max-height: 130px;
+    padding: 8px;
+  }
+
+  /* Тосты */
+  .toast {
+    left: 10px;
+    right: 10px;
+    width: auto;
+    transform: translateY(-70px);
+    text-align: center;
+  }
+
+  .toast.show {
+    transform: translateY(0);
+  }
+
+  /* Создание героя */
+  #create {
+    padding: 12px;
+  }
+
+  #cname {
+    width: 100% !important;
+  }
+
+  /* Данж */
+  .dungeon-map svg {
+    min-width: 520px;
+  }
+
+  /* Экран героя */
+  .statline {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+
+  .statline b {
+    font-size: 14px;
+  }
+}
+
+/* Очень узкие экраны */
+@media (max-width: 430px) {
+  .skillbar {
+    grid-template-columns: 1fr;
+  }
+
+  #arena {
+    grid-template-columns: 1fr;
+  }
+
+  .combatant {
+    display: grid;
+    grid-template-columns: 36px 1fr;
+    grid-template-rows: auto auto auto;
+    column-gap: 8px;
+    align-items: center;
+    text-align: left;
+  }
+
+  .combatant .face {
+    grid-column: 1;
+    grid-row: 1 / span 3;
+    margin: 0;
+    font-size: 27px;
+  }
+
+  .combatant h3 {
+    grid-column: 2;
+    font-size: 12px;
+  }
+
+  .combatant .bar {
+    grid-column: 2;
+  }
+
+  .combatant .bar.hp {
+    margin-top: 2px;
+  }
+
+  .combatant .bar.mp {
+    margin-top: 2px;
+  }
+
+  #pstat {
+    grid-column: 2;
+  }
+}
+
+/* Если пользователь просит меньше анимаций */
+@media (prefers-reduced-motion: reduce) {
+  .invitem,
+  .btn,
+  .tree-skill,
+  .combatant {
+    transition: none !important;
+  }
+}
