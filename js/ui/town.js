@@ -34,7 +34,9 @@ function renderTown() {
       ['hero', '👤', 'Герой'],
       ['tree', '🌳', 'Умения'],
       ['inv', '🎒', 'Инвентарь']
-    ].map(function(x) {
+    ].filter(function(x) {
+      return x[0] !== 'guild';
+    }).map(function(x) {
       return (
         '<button class="btn small ' + (t === x[0] ? 'gold' : '') + '" ' +
         'onclick="S.town=\'' + x[0] + '\';renderTown()">' +
@@ -47,7 +49,6 @@ function renderTown() {
   var html = subnav;
 
   if (t === 'plaza') html += townPlaza();
-  else if (t === 'guild') html += townGuild();
   else if (t === 'tavern') html += townTavern();
   else if (t === 'inn') html += townInn();
   else if (t === 'forge') html += townForge();
@@ -78,10 +79,6 @@ function townPlaza() {
     (ri.next ? ' · до повышения ' + (ri.next.p - ri.pts) + ' очков' : '') +
     '</div>' +
     '<div class="locgrid">' +
-
-    '<div class="loccard" onclick="S.town=\'guild\';renderTown()">' +
-    '<div class="lic">🏛️</div><h4>Гильдия наёмников</h4><p>Заказы, кости, карты</p>' +
-    '</div>' +
 
     '<div class="loccard" onclick="S.town=\'tavern\';renderTown()">' +
     '<div class="lic">🍺</div><h4>Таверна</h4><p>15 блюд, баффы</p>' +
