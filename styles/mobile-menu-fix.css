@@ -1,0 +1,296 @@
+/* =====================================================
+   МОБИЛЬНОЕ МЕНЮ, НИЖНЯЯ НАВИГАЦИЯ, ФИКС БОЕВЫХ БАЛОВ
+   ===================================================== */
+
+/* Скрываем старую верхнюю подпанель на мобилке */
+@media (max-width: 760px) {
+  .subnav {
+    display: none !important;
+  }
+
+  body {
+    padding-bottom: 74px;
+  }
+}
+
+/* =============================== */
+/* Нижняя навигация                */
+/* =============================== */
+
+#mobile-bottom-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 70;
+  display: none;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 2px;
+  background: rgba(15, 12, 8, 0.98);
+  border-top: 1px solid rgba(211, 164, 76, 0.22);
+  box-shadow: 0 -10px 28px rgba(0, 0, 0, 0.32);
+  padding:
+    6px 5px
+    calc(6px + env(safe-area-inset-bottom, 0px));
+}
+
+@media (max-width: 760px) {
+  #mobile-bottom-nav {
+    display: grid;
+  }
+}
+
+#mobile-bottom-nav.hidden {
+  display: none !important;
+}
+
+.mnav-btn {
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: var(--dim);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-height: 52px;
+  padding: 6px 2px;
+  font-size: 11px;
+  font-family: var(--fb);
+  border-radius: 12px;
+  transition:
+    color 0.15s ease,
+    background 0.15s ease,
+    transform 0.12s ease;
+}
+
+.mnav-btn .ic {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.mnav-btn:active {
+  transform: scale(0.96);
+}
+
+.mnav-btn.active {
+  color: var(--gold2);
+  background: rgba(211, 164, 76, 0.08);
+}
+
+/* =============================== */
+/* Выдвижное меню "Ещё"            */
+/* =============================== */
+
+#mobile-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 68;
+  background: rgba(0, 0, 0, 0.55);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+body.mobile-sheet-open #mobile-sheet-backdrop {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+#mobile-sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 69;
+  transform: translateY(112%);
+  transition: transform 0.24s ease;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.12)),
+    #171209;
+  border: 1px solid rgba(211, 164, 76, 0.24);
+  border-bottom: none;
+  border-radius: 18px 18px 0 0;
+  padding: 12px;
+  max-height: 72vh;
+  overflow: auto;
+  box-shadow: 0 -18px 48px rgba(0, 0, 0, 0.42);
+}
+
+body.mobile-sheet-open #mobile-sheet {
+  transform: translateY(0);
+}
+
+#mobile-sheet .sheet-title {
+  color: var(--gold);
+  font-weight: 700;
+  font-size: 13px;
+  margin-bottom: 10px;
+  text-align: center;
+  letter-spacing: 0.06em;
+}
+
+.sheet-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.sheet-grid .btn {
+  width: 100%;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+
+/* =============================== */
+/* Фикс боевых баров на мобильном  */
+/* =============================== */
+
+@media (max-width: 760px) {
+  #arena {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 6px !important;
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background: rgba(11, 10, 8, 0.97);
+    backdrop-filter: blur(8px);
+    padding: 7px !important;
+    margin: 0 0 10px !important;
+    border-bottom: 1px solid rgba(211, 164, 76, 0.18);
+  }
+
+  .combatant {
+    text-align: left !important;
+    padding: 8px !important;
+    min-width: 0;
+  }
+
+  .combatant::after {
+    content: "";
+    display: block;
+    clear: both;
+  }
+
+  .combatant .face {
+    float: left;
+    font-size: 28px !important;
+    margin: 0 10px 4px 0 !important;
+    line-height: 1;
+  }
+
+  .combatant h3 {
+    font-size: 14px !important;
+    line-height: 1.2;
+    margin: 0 0 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .combatant .tag {
+    display: none !important;
+  }
+
+  .chlabel {
+    display: none !important;
+  }
+
+  /* Скрываем полосы замаха, оставляем только HP/MP */
+  .combatant .bar:not(.hp):not(.mp) {
+    display: none !important;
+  }
+
+  .combatant .bar {
+    clear: none;
+    margin-top: 4px !important;
+  }
+
+  .combatant .bar.hp {
+    height: 24px !important;
+  }
+
+  .combatant .bar.hp > span {
+    font-size: 11px !important;
+    letter-spacing: 0.02em;
+  }
+
+  .combatant .bar.mp {
+    height: 12px !important;
+  }
+
+  .combatant .bar.mp > span {
+    font-size: 8px !important;
+  }
+
+  #pstat {
+    clear: both;
+    font-size: 10px !important;
+    min-height: 12px;
+  }
+}
+
+/* =============================== */
+/* Баннер этажа                    */
+/* =============================== */
+
+.floor-banner {
+  border-color: rgba(211, 164, 76, 0.26);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.08)),
+    var(--pan);
+}
+
+.floor-banner .floor-mod {
+  color: var(--gold2);
+  font-weight: 700;
+}
+
+/* =============================== */
+/* Данж-события                    */
+/* =============================== */
+
+.event-panel {
+  border-color: rgba(79, 179, 165, 0.28);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.015), rgba(0, 0, 0, 0.08)),
+    var(--pan);
+}
+
+.event-panel h3 {
+  color: var(--gold2);
+  font-size: 18px;
+  margin-bottom: 6px;
+}
+
+.event-panel p {
+  color: var(--dim);
+  font-size: 13px;
+  line-height: 1.45;
+  margin-bottom: 10px;
+}
+
+.event-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.event-actions .btn {
+  flex: 1 1 auto;
+}
+
+/* =============================== */
+/* Таймеры заказов                 */
+/* =============================== */
+
+.order .tm {
+  min-width: 52px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
