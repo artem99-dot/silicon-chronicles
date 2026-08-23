@@ -1,10 +1,19 @@
+'use strict';
+
 var CLASSES = {
   war: {
     name: 'Воин',
     icon: '⚔️',
     desc: 'Стена из стали и злобы.',
     col: '#e0653a',
-    skills: ['strike', 'cleave', 'warcry', 'blood', 'execute', 'storm']
+    skills: [
+      'war_strike',
+      'war_armor_break',
+      'war_battle_cry',
+      'war_bloodlust',
+      'war_executioner',
+      'war_storm'
+    ]
   },
 
   mage: {
@@ -12,7 +21,14 @@ var CLASSES = {
     icon: '🔥',
     desc: 'Хрупок, как стекло, и вдвое опаснее.',
     col: '#5a9fd6',
-    skills: ['fireball', 'nova', 'arcanic', 'drain', 'meteor', 'tempest']
+    skills: [
+      'mage_fireball',
+      'mage_nova',
+      'mage_drain',
+      'mage_focus',
+      'mage_meteor_sense',
+      'mage_elemental_storm'
+    ]
   },
 
   rog: {
@@ -20,7 +36,14 @@ var CLASSES = {
     icon: '🗡️',
     desc: 'Сначала удар, потом вопросы.',
     col: '#7fb95c',
-    skills: ['sneak', 'fan', 'poison', 'dance', 'evis', 'mark']
+    skills: [
+      'rog_sneak',
+      'rog_poison',
+      'rog_dance',
+      'rog_fan',
+      'rog_eviscerate',
+      'rog_mark'
+    ]
   },
 
   ran: {
@@ -28,7 +51,14 @@ var CLASSES = {
     icon: '🏹',
     desc: 'Стрела находит цель даже в тумане.',
     col: '#c9b458',
-    skills: ['aimed', 'rain', 'trap', 'pierce', 'hawk', 'barrage']
+    skills: [
+      'ran_aimed',
+      'ran_trap',
+      'ran_hawk',
+      'ran_rain',
+      'ran_pierce',
+      'ran_barrage'
+    ]
   },
 
   pal: {
@@ -36,7 +66,14 @@ var CLASSES = {
     icon: '🛡️',
     desc: 'Лечит себя верой, врагов — молотом.',
     col: '#f0cf8a',
-    skills: ['smite', 'holy', 'shield', 'consecrate', 'judgement', 'aegis']
+    skills: [
+      'pal_smite',
+      'pal_shield',
+      'pal_judgement',
+      'pal_dawn',
+      'pal_consecrate',
+      'pal_aegis'
+    ]
   }
 };
 

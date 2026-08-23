@@ -303,3 +303,101 @@ var SKILLDB = {
     md: '+4с'
   }
 };
+
+/* =====================================================
+   НОВАЯ СИСТЕМА ДРЕВА НАВЫКОВ
+   ===================================================== */
+
+// Переопределяем buildClassTree для новой системы
+window.buildClassTree = function () {
+  if (!S) return;
+
+  var cls = S.hero.cls;
+  var nodes = [];
+  var adj = {};
+  var byId = {};
+
+  function mk(id, x, y, si, kind) {
+    var nd = {
+      id: id,
+      x: x,
+      y: y,
+      si: si,
+      kind: kind
+    };
+
+    nodes.push(nd);
+    byId[id] = nd;
+    adj[id] = [];
+
+    return nd;
+  }
+
+  // Центральная точка
+  mk('origin', 0, 0, -1, 'origin');
+
+  // 6 навыков: 3 активных + 3 пассивных
+  CLASSES[cls].skills.forEach(function (key, si) {
+    var angle = (-90 + si * 60) * Math.PI / 180;
+    var prev = 'origin';
+
+    // 5 рангов для каждого навыка
+    [95, 150, 205, 260, 315].forEach(function (dist, ri) {
+      var jit = (((si * 3 + ri * 7) % 9) - 4) * Math.PI / 180;
+      var id = 'r_' + si + '_' + (ri + 1);
+
+      mk(
+        id,
+        Math.cos(angle + jit) * dist,
+        Math.sin(angle + jit) * dist,
+        si,
+        'rank'
+      );
+
+      adj[prev].push(id);
+      adj[id].push(prev);
+
+      prev = id;
+    });
+
+    // Мастерство (6-й ранг)
+    var mid = 'm_' + si;
+
+    mk(
+      mid,
+      Math.cos(angle) * 388,
+      Math.sin(angle) * 388,
+      si,
+      'mastery'
+    );
+
+    adj[prev].push(mid);
+    adj[mid].push(prev);
+  });
+
+  CT = {
+    nodes: nodes,
+    adj: adj,
+    byId: byId
+  };
+};
+
+// Переопределяем функцию получения ранга
+window.skillRank = function (si) {
+  var r = 0;
+
+  for (var k = 1; k <= 5; k++) {
+    if (talloc()['r_' + si + '_' + k]) {
+      r = k;
+    } else {
+      break;
+    }
+  }
+
+  return r;
+};
+
+// Переопределяем проверку мастерства
+window.hasMastery = function (si) {
+  return !!talloc()['m_' + si];
+};
