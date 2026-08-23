@@ -84,7 +84,9 @@
         top: 0,
         behavior: 'smooth'
       });
-    } catch (e) {}
+    } catch (e) {
+      // Игнорируем ошибки scroll
+    }
   };
 
   window.treeCancel = function () {
